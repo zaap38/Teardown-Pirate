@@ -1,0 +1,10 @@
+<prefab version="1.1.0">
+	<group>
+		<script name="bombardballscript" pos="0.0 0.0 0.0" rot="0.0 0.0 0.0" file="MOD/scripts/ball.lua">
+			<body name="bombardball" tags="bombardball unbreakable=true" pos="0.0 0.0 0.0" rot="0.0 0.0 0.0" dynamic="true">
+				<vox tags="bombardball unbreakable=true" material="heavy metal" file="MOD/vox/canonball.vox"/>
+			</body>
+		</script>
+	</group>
+</prefab>
+

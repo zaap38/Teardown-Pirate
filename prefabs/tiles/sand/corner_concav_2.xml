@@ -1,0 +1,5 @@
+<prefab version="1.1.0">
+	<group name="instance=MOD/prefabs/tiles/sand/corner_concav_2.xml" pos="0.0 0.0 0.0" rot="0.0 0.0 0.0">
+		<vox file="MOD/vox/tiles/sand/corner_concav_2.vox"/>
+	</group>
+</prefab>

@@ -1,0 +1,20 @@
+<prefab version="0.9.3">
+	<group id_="9110060" name="shipwreck" pos="45.1 21.6 89.5">
+		<vehicle id_="632133312" open_="true" name="shipwreck" tags="" pos="7.1 0.1 -50.15" rot="0.0 180.0 0.0" sound="yacht" topspeed="50" strength="2" steerassist="0.015">
+			<body id_="339366112" open_="true" pos="0.0 0.0 -0.0" dynamic="true">
+				<vox id_="678011328" open_="true" pos="0.15 0.0 4.3" rot="0 90 0" texture="4" density="4" strength="3" file="MOD/prefabs/vehicles/player_ship_1/shipwreck.vox" object="rear">
+					<location id_="524647712" tags="player" pos="-1.4 5.6 -0.15" rot="0.0 -90.0 0.0"/>
+					<location id_="1739234944" tags="propeller" pos="-3.2 -0.7 -0.25" rot="0.0 90.0 0.0"/>
+				</vox>
+				<vox id_="1912981504" open_="true" pos="0.15 0.0 -7.3" rot="0 90 0" texture="4" density="4" strength="3" file="MOD/prefabs/vehicles/player_ship_1/shipwreck.vox" object="front">
+					<vox id_="688628800" pos="-6.6 7.8 -1.2" texture="4" density="4" strength="3" file="MOD/prefabs/vehicles/player_ship_1/shipwreck.vox" object="mast 2"/>
+					<vox id_="1067712128" pos="-0.6 6.1 0.0" texture="4" density="4" strength="3" file="MOD/prefabs/vehicles/player_ship_1/shipwreck.vox" object="mast 1"/>
+					<vox id_="1325939712" open_="true" pos="-6.6 10.9 1.7" rot="90 0 0" texture="4" density="4" strength="3" prop="true" file="MOD/prefabs/vehicles/player_ship_1/shipwreck.vox" object="mast 2 teil">
+						<joint id_="1422349056" pos="0.2 0.00001 -1.2"/>
+					</vox>
+				</vox>
+			</body>
+		</vehicle>
+	</group>
+</prefab>
+

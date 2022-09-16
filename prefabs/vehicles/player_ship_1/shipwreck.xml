@@ -1,0 +1,97 @@
+<prefab version="1.1.0">
+	<group name="instance=MOD/prefabs/vehicles/player_ship_1/shipwreck.xml" pos="-12.7 -1.6 51.5" rot="0.0 0.0 0.0">
+		<script pos="7.4 -0.7 -48.1" file="MOD/prefabs/vehicles/player_ship_1/player_ship.lua">
+			<vehicle name="shipwreck" pos="-0.3 0.8 -2.05" rot="0.0 180.0 0.0" sound="yacht" topspeed="50" strength="2" steerassist="0.015">
+				<body pos="0.0 0.0 -0.0" dynamic="true">
+					<group name="lamps">
+						<vox pos="0.05 4.6 5.2" file="MOD/prefabs/vehicles/player_ship_1/shipwreck.vox" object="lamp">
+							<voxbox pos="0.0 0.2 -0.1" prop="true" size="1 2 1" color="0.8 0.7 0.2" pbr="0 0 0 8">
+								<light pos="0.05 0.1 0.05" color="0.8 0.6 0.2" scale="2" size="0.1"/>
+							</voxbox>
+						</vox>
+						<vox pos="2.9 6.3 9.3" file="MOD/prefabs/vehicles/player_ship_1/shipwreck.vox" object="lamp">
+							<voxbox pos="0.0 0.2 -0.1" prop="true" size="1 2 1" color="0.8 0.7 0.2" pbr="0 0 0 8">
+								<light pos="0.05 0.1 0.05" color="0.8 0.6 0.2" scale="2" size="0.1"/>
+							</voxbox>
+						</vox>
+						<vox pos="-2.8 6.3 9.3" file="MOD/prefabs/vehicles/player_ship_1/shipwreck.vox" object="lamp">
+							<voxbox pos="0.0 0.2 -0.1" prop="true" size="1 2 1" color="0.8 0.7 0.2" pbr="0 0 0 8">
+								<light pos="0.05 0.1 0.05" color="0.8 0.6 0.2" scale="2" size="0.1"/>
+							</voxbox>
+						</vox>
+						<vox pos="-3.15 4.0 2.3" file="MOD/prefabs/vehicles/player_ship_1/shipwreck.vox" object="lamp">
+							<voxbox pos="0.0 0.2 -0.1" prop="true" size="1 2 1" color="0.8 0.7 0.2" pbr="0 0 0 8">
+								<light pos="0.05 0.1 0.05" color="0.8 0.6 0.2" scale="2" size="0.1"/>
+							</voxbox>
+						</vox>
+						<vox pos="3.25 4.0 2.3" file="MOD/prefabs/vehicles/player_ship_1/shipwreck.vox" object="lamp">
+							<voxbox pos="0.0 0.2 -0.1" prop="true" size="1 2 1" color="0.8 0.7 0.2" pbr="0 0 0 8">
+								<light pos="0.05 0.1 0.05" color="0.8 0.6 0.2" scale="2" size="0.1"/>
+							</voxbox>
+						</vox>
+						<vox pos="-3.15 4.8 -4.9" file="MOD/prefabs/vehicles/player_ship_1/shipwreck.vox" object="lamp">
+							<voxbox pos="0.0 0.2 -0.1" prop="true" size="1 2 1" color="0.8 0.7 0.2" pbr="0 0 0 8">
+								<light pos="0.05 0.1 0.05" color="0.8 0.6 0.2" scale="2" size="0.1"/>
+							</voxbox>
+						</vox>
+						<vox pos="3.25 4.8 -4.9" file="MOD/prefabs/vehicles/player_ship_1/shipwreck.vox" object="lamp">
+							<voxbox pos="0.0 0.2 -0.1" prop="true" size="1 2 1" color="0.8 0.7 0.2" pbr="0 0 0 8">
+								<light pos="0.05 0.1 0.05" color="0.8 0.6 0.2" scale="2" size="0.1"/>
+							</voxbox>
+						</vox>
+						<vox pos="0.05 4.8 -12.0" file="MOD/prefabs/vehicles/player_ship_1/shipwreck.vox" object="lamp">
+							<voxbox pos="0.0 0.2 -0.1" prop="true" size="1 2 1" color="0.8 0.7 0.2" pbr="0 0 0 8">
+								<light pos="0.05 0.1 0.05" color="0.8 0.6 0.2" scale="2" size="0.1"/>
+							</voxbox>
+						</vox>
+					</group>
+					<group name="canons">
+						<vox tags="canon side=left unbreakable=true" pos="-2.8 2.7 1.9" rot="-90 -90 180" file="MOD/prefabs/vehicles/player_ship_1/canon.vox"/>
+						<vox tags="canon side=right unbreakable=true" pos="3.0 2.7 0.0" rot="-90 90 180" file="MOD/prefabs/vehicles/player_ship_1/canon.vox"/>
+						<vox tags="canon side=right unbreakable=true" pos="3.0 2.7 1.7" rot="-90 90 180" file="MOD/prefabs/vehicles/player_ship_1/canon.vox"/>
+						<vox tags="canon side=right unbreakable=true" pos="3.0 2.7 -3.4" rot="-90 90 180" file="MOD/prefabs/vehicles/player_ship_1/canon.vox"/>
+						<vox tags="canon side=right unbreakable=true" pos="3.0 2.7 -1.7" rot="-90 90 180" file="MOD/prefabs/vehicles/player_ship_1/canon.vox"/>
+						<vox tags="canon side=left unbreakable=true" pos="-2.8 2.7 -3.2" rot="-90 -90 180" file="MOD/prefabs/vehicles/player_ship_1/canon.vox"/>
+						<vox tags="canon side=left unbreakable=true" pos="-2.8 2.7 -1.5" rot="-90 -90 180" file="MOD/prefabs/vehicles/player_ship_1/canon.vox"/>
+						<vox tags="canon side=left unbreakable=true" pos="-2.8 2.7 0.2" rot="-90 -90 180" file="MOD/prefabs/vehicles/player_ship_1/canon.vox"/>
+					</group>
+					<group name="hull">
+						<vox pos="0.15 0.0 4.3" rot="0 90 0" texture="4" density="4" strength="3" file="MOD/prefabs/vehicles/player_ship_1/shipwreck.vox" object="rear">
+							<location tags="player" pos="-1.7 7.3 -0.05" rot="0.0 -90.0 0.0"/>
+							<location tags="propeller" pos="-3.2 -0.7 -0.25" rot="0.0 90.0 0.0"/>
+						</vox>
+						<vox pos="0.15 0.0 -5.0" rot="0 90 0" texture="4" density="4" strength="3" file="MOD/prefabs/vehicles/player_ship_1/shipwreck.vox" object="front"/>
+						<vox pos="0.15 1.5 -11.3" rot="0 90 0" file="MOD/prefabs/vehicles/player_ship_1/shipwreck.vox" object="eperon"/>
+					</group>
+					<group name="mate_middle">
+						<vox pos="0.0 3.2 -0.7" rot="0 90 0" file="MOD/prefabs/vehicles/player_ship_1/shipwreck.vox" object="mate">
+							<group name="sail_top">
+								<vox pos="0.4 9.1 -0.1" rot="0 0 0" file="MOD/prefabs/vehicles/player_ship_1/shipwreck.vox" object="sail_plank">
+									<group name="sails">
+										<vox tags="sail=1 collide=false" pos="0.2 -0.5 0.0" file="MOD/prefabs/vehicles/player_ship_1/shipwreck.vox" object="sail"/>
+										<vox tags="sail=2 collide=false" pos="0.1 -0.5 0.0" file="MOD/prefabs/vehicles/player_ship_1/shipwreck.vox" object="sail"/>
+										<vox tags="sail=3 collide=false" pos="0.0 -0.5 0.0" file="MOD/prefabs/vehicles/player_ship_1/shipwreck.vox" object="sail"/>
+										<vox tags="sail=4 collide=false" pos="-0.1 -0.5 0.0" file="MOD/prefabs/vehicles/player_ship_1/shipwreck.vox" object="sail"/>
+										<vox tags="sail=5 collide=false" pos="-0.2 -0.5 0.0" file="MOD/prefabs/vehicles/player_ship_1/shipwreck.vox" object="sail"/>
+									</group>
+								</vox>
+							</group>
+							<group name="sail_middle">
+								<vox pos="0.4 5.4 -0.1" rot="0 0 0" file="MOD/prefabs/vehicles/player_ship_1/shipwreck.vox" object="sail_plank">
+									<group name="sails">
+										<vox tags="sail=1 collide=false" pos="0.2 -0.5 0.0" file="MOD/prefabs/vehicles/player_ship_1/shipwreck.vox" object="sail"/>
+										<vox tags="sail=2 collide=false" pos="0.1 -0.5 0.0" file="MOD/prefabs/vehicles/player_ship_1/shipwreck.vox" object="sail"/>
+										<vox tags="sail=3 collide=false" pos="0.0 -0.5 0.0" file="MOD/prefabs/vehicles/player_ship_1/shipwreck.vox" object="sail"/>
+										<vox tags="sail=4 collide=false" pos="-0.1 -0.5 0.0" file="MOD/prefabs/vehicles/player_ship_1/shipwreck.vox" object="sail"/>
+										<vox tags="sail=5 collide=false" pos="-0.2 -0.5 0.0" file="MOD/prefabs/vehicles/player_ship_1/shipwreck.vox" object="sail"/>
+									</group>
+								</vox>
+							</group>
+						</vox>
+					</group>
+				</body>
+			</vehicle>
+		</script>
+	</group>
+</prefab>
+

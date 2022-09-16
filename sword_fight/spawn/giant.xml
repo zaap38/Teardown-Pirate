@@ -1,0 +1,77 @@
+<group name="combinesoldier" pos="0.0 0.0 0.0" rot="0.0 0.0 0.0">
+	<script name="combine" pos="-0.5 0.0 0.1" rot="0.0 -90.0 0.0" file="MOD/sword_fight/giant.lua" param0="type=investigate chase">
+		<group name="leftleg" pos="-0.3 0.0 0.0">
+			<body name="leftfoot" tags="leftfoot" pos="-0.1 0.0 -0.1" rot="0.0 0.0 0.0" dynamic="true">
+				<vox tags="unbreakable" pos="0.0 0.0 0.0" file="MOD/sword_fight/giant.vox" object="leftfoot"/>
+			</body>
+			<body name="leftshin" pos="-0.1 0.4 -0.1" rot="0.0 0.0 0.0" dynamic="true">
+				<vox tags="unbreakable" pos="0.0 0.0 0.1" file="MOD/sword_fight/giant.vox" object="leftshin"/>
+				<joint name="leftankle" pos="0.1 0.0 0.1" rot="0.0 90.0 -90.0" type="hinge" collide="false" limits="-45.0 45.0"/>
+			</body>
+			<body name="leftthigh" pos="-0.1 1.2 -0.1" rot="0.0 0.0 0.0" dynamic="true">
+				<vox tags="unbreakable" pos="0.0 0.0 0.1" file="MOD/sword_fight/giant.vox" object="leftthigh"/>
+				<joint name="leftknee" pos="0.0 0.0 0.0" rot="0.0 90.0 -90.0" type="hinge" collide="false" limits="0.0 160.0"/>
+			</body>
+		</group>
+		<group name="rightleg" pos="0.3 0.0 0.0">
+			<body name="rightfoot" tags="rightfoot" pos="0.1 0.0 -0.1" rot="0.0 0.0 0.0" dynamic="true">
+				<vox tags="unbreakable" pos="0.0 0.0 0.0" file="MOD/sword_fight/giant.vox" object="rightfoot"/>
+			</body>
+			<body name="rightshin" pos="0.2 0.4 -0.1" rot="0.0 0.0 0.0" dynamic="true">
+				<vox tags="unbreakable" pos="-0.1 0.0 0.1" file="MOD/sword_fight/giant.vox" object="rightshin"/>
+				<joint name="rightankle" pos="-0.1 0.0 0.1" rot="0.0 -90.0 -90.0" type="hinge" collide="false" limits="-45.0 45.0"/>
+			</body>
+			<body name="rightthigh" pos="0.2 1.2 -0.1" rot="0.0 0.0 0.0" dynamic="true">
+				<vox tags="unbreakable" pos="-0.1 0.0 0.1" file="MOD/sword_fight/giant.vox" object="rightthigh"/>
+				<joint name="rightknee" pos="-0.1 0.0 0.0" rot="0.0 -90.0 -90.0" type="hinge" collide="false" limits="-160.0 0.0"/>
+			</body>
+		</group>
+		<body name="lowertorso" tags="lowertorso unbreakable" pos="0.0 1.7 -0.1" dynamic="true">
+			<vox tags="unbreakable" pos="0.0 -0.3 0.1" file="MOD/sword_fight/giant.vox" object="lowertorso"/>
+			<joint name="waist" pos="0.0 0.5 0.1" collide="false"/>
+			<joint name="righthip" pos="-0.2 -0.1 0.1" collide="false"/>
+			<joint name="lefthip" pos="0.2 -0.1 0.1" collide="false"/>
+		</body>
+		<body name="uppertorso" tags="uppertorso unbreakable" pos="0.0 2.2 -0.1" dynamic="true">
+			<vox tags="unbreakable" pos="0.0 0.0 0.1" file="MOD/sword_fight/giant.vox" object="uppertorso"/>
+			<joint name="neck" tags="neckjoint" pos="0.0 1.4 0.1" rot="-90.0 90.0 0.0" type="hinge" size="0.25" collide="false" limits="-60.0 60.0"/>
+			<joint name="leftshoulder" pos="-0.6 1.3 0.1" collide="false"/>
+			<joint name="rightshoulder" pos="0.6 1.3 0.1" collide="false"/>
+		</body>
+		<body name="head" tags="head" pos="0.0 3.6 0.0" dynamic="true">
+			<vox tags="unbreakable" file="MOD/sword_fight/giant.vox" object="head"/>
+		</body>
+		<group name="leftarm" pos="-0.8 5.6 -0.1">
+			<body name="leftupperarm" pos="0.0 -2.2 0.0" rot="0.0 0.0 0.0" dynamic="true">
+				<vox tags="unbreakable" pos="-0.1 0.0 0.1" file="MOD/sword_fight/giant.vox" object="leftupperarm"/>
+				<joint name="leftelbow" pos="-0.4 0.1 0.3" rot="-90.0 0.0 0.0" type="hinge" collide="false" limits="0.0 160.0"/>
+			</body>
+			<body name="leftforearm" pos="-0.6 -2.2 0.0" rot="0.0 0.0 0.0" dynamic="true">
+				<vox tags="unbreakable" pos="-0.1 0.0 0.1" file="MOD/sword_fight/giant.vox" object="leftforearm"/>
+				<joint name="leftwrist" pos="-0.4 0.1 0.1" rot="-90.0 0.0 0.0" type="hinge" collide="false" limits="-45.0 45.0"/>
+			</body>
+			<body name="lefthand" tags="lefthand" pos="-1.2 -2.3 0.1" rot="0.0 0.0 0.0" dynamic="true">
+				<vox tags="unbreakable" pos="0.0 0.0 0.0" file="MOD/sword_fight/giant.vox" object="lefthand"/>
+			</body>
+		</group>
+		<group name="rightarm" pos="0.8 5.2 -0.1">
+			<body name="rightupperarm" pos="0.1 -1.8 -0.0" rot="0.0 0.0 0.0" dynamic="true">
+				<vox tags="unbreakable" pos="0.0 0.0 0.1" file="MOD/sword_fight/giant.vox" object="rightupperarm"/>
+				<joint name="rightelbow" pos="0.3 0.1 0.3" rot="-90.0 -180.0 0.0" type="hinge" collide="false" limits="-160.0 0.0"/>
+			</body>
+			<body name="rightforearm" pos="0.8 -1.8 -0.0" rot="0.0 0.0 0.0" dynamic="true">
+				<vox tags="unbreakable" pos="-0.1 0.0 0.1" file="MOD/sword_fight/giant.vox" object="rightforearm"/>
+				<joint name="rightwrist" pos="0.2 0.1 0.1" rot="-90.0 -180.0 0.0" type="hinge" collide="false" limits="-45.0 45.0"/>
+			</body>
+			<body name="righthand" tags="righthand" pos="1.2 -1.9 0.1" rot="0.0 0.0 0.0" dynamic="true">
+				<vox tags="unbreakable" pos="0.0 0.0 0.0" file="MOD/sword_fight/giant.vox" object="righthand"/>
+				<joint name="righthand" pos="0.1 0.1 0.0" rot="-90.0 -180.0 0.0" rotstrength="0.0001" rotspring="0.0" collide="false"/>
+			</body>
+		</group>
+		<body name="weapon" tags="aim" pos="2.2 3.4 -0.1" rot="0.0 -90.0 90.0" dynamic="true">
+			<vox tags="unbreakable" pos="0.1 -0.2 -0.3" file="MOD/sword_fight/giant_axe_weapon.vox"/>
+			<location name="weapon" tags="weapon=gun strength=0.3" pos="0.1 0.2 -0.9"/>
+		</body>
+	</script>
+</group>
+

@@ -1,0 +1,6 @@
+<prefab version="0.9.5">
+	<group id_="1073545216" open_="true" name="MOD/prefabs/prop/trees/tree_1.xml" pos="34.9 -0.1 -6.3" rot="0.0 0.0 0.0">
+		<vox id_="226965024" pos="-1.6 0.1 1.4" file="MOD/prefabs/prop/trees/tree_1.vox"/>
+	</group>
+</prefab>
+

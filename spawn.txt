@@ -1,0 +1,6 @@
+prefabs/vehicles/player_ship_1/shipwreck.xml : Ship/Basic ship
+
+prefabs/vehicles/pirate_ship_1/shipwreck.xml : Enemy Ship/Basic ship
+
+sword_fight/spawn/combine.xml : Pirate/Skeleton
+sword_fight/spawn/giant.xml : Pirate/Giant

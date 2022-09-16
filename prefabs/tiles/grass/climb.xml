@@ -1,6 +1,8 @@
 <prefab version="1.1.0">
 	<group name="instance=MOD/prefabs/tiles/grass/climb.xml" pos="0.0 0.0 0.0" rot="0.0 0.0 0.0">
-		<vox file="MOD/vox/tiles/grass/climb.vox"/>
+		<script pos="0 0 0" file="MOD/scripts/grass.lua">
+			<vox file="MOD/vox/tiles/grass/climb.vox"/>
+		</script>
 	</group>
 </prefab>
 

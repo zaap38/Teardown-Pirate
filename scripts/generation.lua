@@ -826,8 +826,10 @@ end
 
 function updateIslands()
     quicksort(islands, 1, #islands, isIslandCloserToPlayer)
+    DebugWatch("Rendering", false)
     for i=1, #islands do
         if updateIslandRenderState(islands[i]) then
+            DebugWatch("Rendering", true)
             --DebugPrint(VecLength(VecSub(toWorldPos(islands[i].pos), GetPlayerTransform().pos)))
             break
         end

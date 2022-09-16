@@ -4,3 +4,6 @@ prefabs/vehicles/pirate_ship_1/shipwreck.xml : Enemy Ship/Basic ship
 
 sword_fight/spawn/combine.xml : Pirate/Skeleton
 sword_fight/spawn/giant.xml : Pirate/Giant
+
+prefabs/tiles/grass/flat.xml : Debug/Flat Grass
+prefabs/tiles/grass/climb.xml : Debug/Climb Grass

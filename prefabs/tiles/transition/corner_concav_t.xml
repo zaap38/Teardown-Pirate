@@ -1,5 +1,7 @@
 <prefab version="1.1.0">
 	<group name="instance=MOD/prefabs/tiles/transition/corner_concav_t.xml" pos="0.0 0.0 0.0" rot="0.0 0.0 0.0">
-		<vox file="MOD/vox/tiles/transition/corner_concav_t.vox"/>
+		<script pos="0 0 0" file="MOD/scripts/grass.lua">
+			<vox file="MOD/vox/tiles/transition/corner_concav_t.vox"/>
+		</script>
 	</group>
 </prefab>

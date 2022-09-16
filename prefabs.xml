@@ -1,6 +1,0 @@
-<prefab version="1.1.0">
-	<group name="instance=MOD/prefabs.xml" pos="0.0 0.0 0.0" rot="0.0 0.0 0.0">
-		<vox file="MOD/prefabs/flat.vox"/>
-	</group>
-</prefab>
-

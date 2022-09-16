@@ -249,31 +249,14 @@ function vecAngle(u, v, signed)
 end
 
 function drawPos(pos, r, g, b, a)
-    if r == nil then
-        r = 1
-        g = 1
-        b = 1
-        a = 1
-    else
-        g = g or 0
-        b = b or 0
-        a = a or 1
-    end
+    r, g, b, a = rgbaInit(r, g, b, a)
     DrawLine(pos, VecAdd(pos, Vec(0, 5)), r, g, b, a)
 end
 
 function drawPath(path, r, g, b, a, decay)
 	decay = decay or false
-    if r == nil then
-        r = 1
-        g = 1
-        b = 1
-        a = 1
-    else
-        g = g or 0
-        b = b or 0
-        a = a or 1
-    end
+	r, g, b, a = rgbaInit(r, g, b, a)
+
     for i=1, #path - 1 do
 		local ratio = 1
 		if decay then
@@ -283,6 +266,30 @@ function drawPath(path, r, g, b, a, decay)
     end
 end
 
+function drawSpriteLine(p1, p2, sprite, width, r, g, b, a, depthTest, additive)
+	r, g, b, a = rgbaInit(r, g, b, a)
+	depthTest = depthTest or false
+	additive = additive or false
+
+	local aToB = VecSub(p1, p2)
+    local length = VecLength(aToB)
+    local t = Transform(VecLerp(p1, p2, 0.5), QuatAlignXZ(VecNormalize(aToB), VecNormalize(VecSub(p1, GetCameraTransform().pos))))
+    DrawSprite(sprite, t, length, width, r, g, b, a, depthTest, additive)
+end
+
+function rgbaInit(r, g, b, a)
+	local tmp_r = 1
+	local tmp_g = 1
+	local tmp_b = 1
+	local tmp_a = 1
+	if r ~= nil or g ~= nil or b ~= nil then
+		tmp_r = r or 0
+		tmp_g = g or 0
+        tmp_b = b or 0
+        tmp_a = a or 1
+	end
+	return tmp_r, tmp_g, tmp_b, tmp_a
+end
 
 
 

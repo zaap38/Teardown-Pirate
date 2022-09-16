@@ -18,11 +18,10 @@ function generationInit()
 
     debug = {
         noSpawn = false,
-        noEnemy = true,
+        noEnemy = false,
         noIsland = false,
-        noDaytime = true
+        noDaytime = false
     }
-    skipRendering = false
 
     local debugConfigStr = ""
     for k, v in pairs(debug) do
@@ -33,6 +32,8 @@ function generationInit()
     if debugConfigStr ~= "" then
         DebugWatch("Debug Config", debugConfigStr)
     end
+    
+    skipRendering = false
 
     treasures = {}
 

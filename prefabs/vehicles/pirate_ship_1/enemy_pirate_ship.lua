@@ -86,6 +86,17 @@ function tick(dt)
             local t = GetVehicleTransform(vehicleHandle)
             local x, y, z = GetQuatEuler(t.rot)
             SetBodyTransform(vehicleBody, Transform(t.pos, QuatEuler(0, y, 0)))
+        elseif emerging > 0 then
+            local t = GetVehicleTransform(vehicleHandle)
+            local p = VecAdd(t.pos, Vec(0, 2, 0))
+            if IsPointInWater(p) then
+                for i=1, 5 do
+                    local offset = VecAdd(p, Vec(math.random() * 4 - 2, 0, math.random() * 4 - 2))
+                    splash(offset)
+                end
+            else
+                emerging = 0
+            end
         end
         if timeToDie <= 15 then
             sinkVelocity = sinkVelocity * 0.97
@@ -375,11 +386,58 @@ function shootCanon(canon, yvel)
     smoke(spawnPos, baseVel)
 end
 
+function splash(pos)
+    local radius = 0.6
+	local life = 3.0
+	local count = 7
+	local drag = 0
+	local gravity = -9.82
+	local alpha = 0.8
+	
+	--Set up the particle state
+	ParticleReset()
+	ParticleType("plain")
+	ParticleRadius(radius)
+	ParticleAlpha(alpha, 0.3)	-- Ramp up fast, ramp down after 50%
+	ParticleGravity(gravity * randFloat(0.9, 1.1))				-- Slightly randomized gravity looks better
+	ParticleDrag(drag)
+	ParticleTile(0)
+	ParticleCollide(0, 1, "easeout")
+    ParticleEmissive(0.8, 0.8)
+
+    local force = 7
+    local baseVel = GetBodyVelocity(vehicleBody)
+    baseVel = VecScale(VecNormalize(baseVel), force)
+	
+	--Emit particles
+	for i=1, count do
+        local red = 0.8
+        local green = 0.8
+        local blue = 0.85
+        if rand(1, 5) == 5 then
+            red = 0.7
+            green = 0.7
+        end
+        ParticleColor(red, green, blue, 0.6, 0.6, 0.75)
+		local p = VecAdd(pos, randVec(3))
+	
+		--Randomize lifetime
+		local l = randFloat(life * 0.8, life * 1.2)
+
+        local vel = randVec(1.5)
+        vel = VecAdd(vel, Vec(0, force, 0))
+        vel = VecAdd(vel, baseVel)
+        vel = VecScale(vel, randFloat(0.5, 1.5))
+
+		SpawnParticle(p, vel, l)
+	end
+end
+
 function smoke(pos, baseVel)
-    local radius = 0.3
-	local life = 4
+    local radius = 0.6
+	local life = 3
 	local count = 200
-	local drag = 0.2
+	local drag = 0.05
 	local gravity = 0
 	local alpha = 0.9
 
@@ -407,8 +465,8 @@ function smoke(pos, baseVel)
         local green = 0.05 + modif
         local blue = 0.05 + modif
         ParticleColor(red, green, blue)			-- Animating color towards white
-		p = VecAdd(pos, randVec(2 * radius))
-		local v = VecAdd(randVec(randFloat(0.5, 7)), baseVel)
+		p = VecAdd(pos, randVec(1 * radius))
+		local v = VecAdd(randVec(randFloat(0.5, 3)), baseVel)
 
         if v[2] < 0 then
             v[2] = v[2] * 0.5

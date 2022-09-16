@@ -221,10 +221,10 @@ function shootCanon(canon)
 end
 
 function smoke(pos, baseVel)
-    local radius = 0.3
-	local life = 4
+    local radius = 0.6
+	local life = 3
 	local count = 200
-	local drag = 0.2
+	local drag = 0.05
 	local gravity = 0
 	local alpha = 0.9
 
@@ -252,8 +252,8 @@ function smoke(pos, baseVel)
         local green = 0.05 + modif
         local blue = 0.05 + modif
         ParticleColor(red, green, blue)			-- Animating color towards white
-		p = VecAdd(pos, randVec(2 * radius))
-		local v = VecAdd(randVec(randFloat(0.5, 7)), baseVel)
+		p = VecAdd(pos, randVec(1 * radius))
+		local v = VecAdd(randVec(randFloat(0.5, 3)), baseVel)
 
         if v[2] < 0 then
             v[2] = v[2] * 0.5

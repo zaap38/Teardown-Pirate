@@ -7,3 +7,4 @@ sword_fight/spawn/giant.xml : Pirate/Giant
 
 prefabs/tiles/grass/flat.xml : Debug/Flat Grass
 prefabs/tiles/grass/climb.xml : Debug/Climb Grass
+prefabs/canonball/canonball.xml : Debug/Canon Ball

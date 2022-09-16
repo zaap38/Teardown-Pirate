@@ -171,36 +171,6 @@ function exist(element, tab)
 	return false, 0
 end
 
-function defaultGeq(a, b)
-	return a <= b
-end
-
-function partition(array, left, right, pivotIndex, fun)
-	local pivotValue = array[pivotIndex]
-	array[pivotIndex], array[right] = array[right], array[pivotIndex]
-	
-	local storeIndex = left
-	
-	for i =  left, right-1 do
-    	if fun(array[i], pivotValue) then --array[i] <= pivotValue then
-	        array[i], array[storeIndex] = array[storeIndex], array[i]
-	        storeIndex = storeIndex + 1
-		end
-		array[storeIndex], array[right] = array[right], array[storeIndex]
-	end
-	
-   return storeIndex
-end
-
-function quicksort(array, left, right, fun)
-	fun = fun or defaultGeq()
-	if right > left then
-	    local pivotNewIndex = partition(array, left, right, left, fun)
-	    quicksort(array, left, pivotNewIndex - 1, fun)
-	    quicksort(array, pivotNewIndex + 1, right, fun)
-	end
-end
-
 function rebound(value, minV, maxV)
 	return math.min(math.max(value, minV), maxV)
 end

@@ -5,7 +5,13 @@ function init()
     sprite = LoadSprite("MOD/img/grass.png")
     shape = FindShape("")
     shapeT = GetShapeWorldTransform(shape)
+
     maxDist = 30
+    fov = math.rad(GetInt("options.gfx.fov"))
+    maxFov = math.deg(2 * math.atan(math.tan(fov / 2) * (16 / 9))) + 10
+
+    maxFov = maxFov / 2
+    useFov = true
 
     spriteHeight = 0.8
 
@@ -28,7 +34,18 @@ end
 function tick(dt)
     local dist = VecLength(VecSub(GetCameraTransform().pos, shapeT.pos))
     local alpha = math.min((maxDist - dist) / 5, 1)
-    if dist <= maxDist then
+
+    local angle = 0
+    if useFov then
+        local ct = GetCameraTransform()
+        local playerDir = TransformToParentVec(ct, fwd())
+        playerDir[2] = 0
+        toGrass = VecSub(shapeT.pos, ct.pos)
+        toGrass[2] = 0
+        angle = vecAngle(playerDir, toGrass)
+    end
+
+    if dist <= maxDist and (angle <= maxFov or dist <= 10) then
         local newPositions = {}
 
         local brigtness = GetEnvironmentProperty("sunBrightness")

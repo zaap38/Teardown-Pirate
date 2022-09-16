@@ -9,6 +9,8 @@ function generationInit()
     islandTileSize = 5
     islandTileHeight = 3
 
+    renderDist = 3.2
+
     daytime = {
         value = 150,
         max = 300
@@ -20,6 +22,7 @@ function generationInit()
         noIsland = false,
         noDaytime = true
     }
+    skipRendering = false
 
     local debugConfigStr = ""
     for k, v in pairs(debug) do
@@ -465,8 +468,16 @@ function makeIsland(tile)
             aa = Vec(10000, 0, 10000),
             bb = Vec(-10000, 0, -10000)
         },
-        renderState = 0 -- 0: no render, 1: sprite, 2: -, 3: detailed tiles
+        renderState = 0--0 -- 0: no render, 1: sprite, 2: -, 3: detailed tiles
     }
+    local pos = Vec()
+    local x, z = getPlayerTile()
+    pos[1] = x
+    pos[3] = z
+    local dist = VecLength(VecSub(pos, island.pos))
+    if dist <= renderDist then
+        island.renderState = 3
+    end
 
     island.name = names.part1[rand(1, #names.part1)] .. " " .. names.part2[rand(1, #names.part2)]
 
@@ -805,32 +816,55 @@ function shift(array)
     return newArray
 end
 
+function islandDistRender(a, b)
+    local playerPos = GetPlayerTransform().pos
+    local da = VecLength(VecSub(toWorldPos(a.pos), playerPos))
+    local sa = a.renderState
+    if sa == 3 then
+        return da
+    else
+        return da + 10000
+    end
+end
+
 function isIslandCloserToPlayer(a, b)
     local playerPos = GetPlayerTransform().pos
     local da = VecLength(VecSub(toWorldPos(a.pos), playerPos))
     local db = VecLength(VecSub(toWorldPos(b.pos), playerPos))
     local sa = a.renderState
     local sb = b.renderState
-    if da <= db then
-        if sa == 3 then
+    --return da < db
+    if sa == 3 then
+        if sb ~= 3 then
             return true
+        else
+            return da < db
         end
-        return false
     else
         if sb == 3 then
             return false
+        else
+            return da >= db
         end
-        return true
     end
 end
 
 function updateIslands()
-    quicksort(islands, 1, #islands, isIslandCloserToPlayer)
+    skipRendering = not skipRendering
+    if skipRendering then
+        return
+    end
+
+    if #islands > 1 then
+        table.sort(islands, isIslandCloserToPlayer)
+    end
+
     DebugWatch("Rendering", false)
     for i=1, #islands do
         if updateIslandRenderState(islands[i]) then
             DebugWatch("Rendering", true)
-            --DebugPrint(VecLength(VecSub(toWorldPos(islands[i].pos), GetPlayerTransform().pos)))
+            local dist = VecLength(VecSub(toWorldPos(islands[i].pos), GetPlayerTransform().pos))
+            --DebugPrint(islands[i].name .. " " .. dist)
             break
         end
     end
@@ -845,7 +879,7 @@ function updateIslandRenderState(island)
     pos[3] = z
     local dist = VecLength(VecSub(pos, island.pos))
 
-    if dist <= 3.2 then
+    if dist <= renderDist then
         island.renderState = 3
     else
         island.renderState = 0

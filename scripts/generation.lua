@@ -17,10 +17,11 @@ function generationInit()
     }
 
     debug = {
-        noSpawn = false,
-        noEnemy = false,
-        noIsland = false,
-        noDaytime = false
+        noSpawn = false,  -- disable enemy and island spawning
+        noEnemy = true,  -- disable enemy spawning
+        noIsland = false,  -- disable island spawning
+        noDaytime = true,  -- disable daytime cycle
+        islandsCount = 1  -- fix the count of islands spawned to this value. No count if nil.
     }
 
     local debugConfigStr = ""
@@ -119,6 +120,7 @@ function generationInit()
 end
 
 function generationTick(dt)
+
     if enteringChunk() then
         addMissingTiles()
     end
@@ -262,6 +264,15 @@ function spawnAdjacent(pos)
             local b = 0
             local randVal = rand(1, 100)
             local spawnIsland = (rand(1, 100) <= 7) -- probability to spawn an island or a spawn
+
+            if debug.islandsCount ~= nil then
+                if #islands < debug.islandsCount then
+                    spawnIsland = true
+                else
+                    spawnIsland = false
+                end
+            end
+
             if spawnIsland then
                 if randVal <= 50 then
                     b = biomeType.desertic

@@ -64,7 +64,7 @@
 						<vox pos="0.15 1.5 -11.3" rot="0 90 0" file="MOD/prefabs/vehicles/player_ship_1/shipwreck.vox" object="eperon"/>
 					</group>
 					<group name="mate_middle">
-						<vox pos="0.0 3.2 -0.7" rot="0 90 0" file="MOD/prefabs/vehicles/player_ship_1/shipwreck.vox" object="mate">
+						<vox pos="0.1 3.2 -0.7" rot="0 90 0" file="MOD/prefabs/vehicles/player_ship_1/shipwreck.vox" object="mate">
 							<group name="sail_top">
 								<vox pos="0.4 9.1 -0.1" rot="0 0 0" file="MOD/prefabs/vehicles/player_ship_1/shipwreck.vox" object="sail_plank">
 									<group name="sails">
@@ -78,6 +78,21 @@
 							</group>
 							<group name="sail_middle">
 								<vox pos="0.4 5.4 -0.1" rot="0 0 0" file="MOD/prefabs/vehicles/player_ship_1/shipwreck.vox" object="sail_plank">
+									<group name="sails">
+										<vox tags="sail=1 collide=false" pos="0.2 -0.5 0.0" file="MOD/prefabs/vehicles/player_ship_1/shipwreck.vox" object="sail"/>
+										<vox tags="sail=2 collide=false" pos="0.1 -0.5 0.0" file="MOD/prefabs/vehicles/player_ship_1/shipwreck.vox" object="sail"/>
+										<vox tags="sail=3 collide=false" pos="0.0 -0.5 0.0" file="MOD/prefabs/vehicles/player_ship_1/shipwreck.vox" object="sail"/>
+										<vox tags="sail=4 collide=false" pos="-0.1 -0.5 0.0" file="MOD/prefabs/vehicles/player_ship_1/shipwreck.vox" object="sail"/>
+										<vox tags="sail=5 collide=false" pos="-0.2 -0.5 0.0" file="MOD/prefabs/vehicles/player_ship_1/shipwreck.vox" object="sail"/>
+									</group>
+								</vox>
+							</group>
+						</vox>
+					</group>
+					<group name="mate_fwd">
+						<vox pos="0.1 4.2 -6.6" rot="0 90" file="MOD/prefabs/vehicles/player_ship_1/shipwreck.vox" object="mate_fwd">
+							<group name="sail_middle">
+								<vox pos="0.4 4.8 -0.1" rot="0 0 0" file="MOD/prefabs/vehicles/player_ship_1/shipwreck.vox" object="sail_plank">
 									<group name="sails">
 										<vox tags="sail=1 collide=false" pos="0.2 -0.5 0.0" file="MOD/prefabs/vehicles/player_ship_1/shipwreck.vox" object="sail"/>
 										<vox tags="sail=2 collide=false" pos="0.1 -0.5 0.0" file="MOD/prefabs/vehicles/player_ship_1/shipwreck.vox" object="sail"/>

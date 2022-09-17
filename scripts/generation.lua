@@ -10,6 +10,8 @@ function generationInit()
     islandTileHeight = 3
 
     renderDist = 3.2
+    renderedCount = 0
+    renderedLimit = 3
 
     daytime = {
         value = 150,
@@ -21,7 +23,7 @@ function generationInit()
         noEnemy = true,  -- disable enemy spawning
         noIsland = false,  -- disable island spawning
         noDaytime = true,  -- disable daytime cycle
-        islandsCount = 1  -- fix the count of islands spawned to this value. No count if nil.
+        islandsCount = nil  -- fix the count of islands spawned to this value. No count if nil.
     }
 
     local debugConfigStr = ""
@@ -126,7 +128,13 @@ function generationTick(dt)
     end
     DebugWatch("#tiles", #tiles)
     DebugWatch("#islands", #islands)
-    DebugWatch("#islands", #islands)
+    renderedCount = 0
+    for i=1, #islands do
+        if #islands[i].bodies > 0 then
+            renderedCount = renderedCount + 1
+        end
+    end
+    DebugWatch("Rendered", renderedCount .. "/" .. renderedLimit)
     local x, z = getTileCoord(GetPlayerTransform().pos)
     local tile = tilesCoordToIndex[x][z]
     if tile.island ~= nil then
@@ -828,24 +836,27 @@ function shift(array)
     return newArray
 end
 
-function islandDistRender(a, b)
-    local playerPos = GetPlayerTransform().pos
-    local da = VecLength(VecSub(toWorldPos(a.pos), playerPos))
-    local sa = a.renderState
-    if sa == 3 then
-        return da
-    else
-        return da + 10000
-    end
-end
-
 function isIslandCloserToPlayer(a, b)
     local playerPos = GetPlayerTransform().pos
     local da = VecLength(VecSub(toWorldPos(a.pos), playerPos))
     local db = VecLength(VecSub(toWorldPos(b.pos), playerPos))
     local sa = a.renderState
     local sb = b.renderState
-    --return da < db
+    if renderedCount >= renderedLimit then
+        if sa == 3 then
+            if sb == 3 then
+                return da < db
+            else
+                return false
+            end
+        else
+            if sb == 3 then
+                return true
+            else
+                return da >= db
+            end
+        end
+    end
     if sa == 3 then
         if sb ~= 3 then
             return true
@@ -864,19 +875,24 @@ end
 function updateIslands()
     skipRendering = not skipRendering
     if skipRendering then
-        return
+        --return
     end
 
     if #islands > 1 then
         table.sort(islands, isIslandCloserToPlayer)
     end
 
+    --[[DebugPrint("vvvvvvvvvvvvvv")
+    for i=1, #islands do
+        local dist = VecLength(VecSub(toWorldPos(islands[i].pos), GetPlayerTransform().pos))
+        DebugPrint(islands[i].name .. " " .. islands[i].renderState .. " " .. dist)
+    end]]
+
     DebugWatch("Rendering", false)
     for i=1, #islands do
+        local dist = VecLength(VecSub(toWorldPos(islands[i].pos), GetPlayerTransform().pos))
         if updateIslandRenderState(islands[i]) then
             DebugWatch("Rendering", true)
-            local dist = VecLength(VecSub(toWorldPos(islands[i].pos), GetPlayerTransform().pos))
-            --DebugPrint(islands[i].name .. " " .. dist)
             break
         end
     end

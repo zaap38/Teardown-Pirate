@@ -53,6 +53,11 @@ function floorVec(v)
 	return Vec(math.floor(v[1]), math.floor(v[2]), math.floor(v[3]))
 end
 
+function floorQuat(q)
+	local x, y, z = GetQuatEuler(q)
+	return QuatEuler(math.floor(x), math.floor(y), math.floor(z))
+end
+
 function debugWatchTable(t)
 	for k, v in pairs(t) do
 		if type(v) ~= "boolean" then
@@ -65,6 +70,14 @@ function vecToString(v)
 	return "Vec(" .. v[1] .. ", " .. v[2] .. ", " .. v[3] .. ")"
 end
 
+function vecToStr(v)
+	return vecToString(v)
+end
+
+function quatToStr(q)
+	local x, y, z = GetQuatEuler(q)
+	return "Quat(" .. x .. ", " .. y .. ", " .. z .. ")"
+end
 
 function getSpawnedEntities(ent, type, debug)
 	debug = debug or false

@@ -239,12 +239,14 @@ function getPredictionPos()
     local shipT = GetVehicleTransform(vehicleHandle)
     local playerT = GetPlayerTransform()
     local pvehicle = GetPlayerVehicle()
+    local upBonus = 0
     if pvehicle ~= 0 then
         playerT = GetVehicleTransform(pvehicle)
+        upBonus = 2
     end
 
     shipT.pos[2] = 0
-    playerT.pos[2] = 0
+    playerT.pos[2] = upBonus
     local toPlayer = VecSub(playerT.pos, shipT.pos)
     local angle = vecAngle(toPlayer, TransformToParentVec(shipT, Vec(1, 0, 0)))
     if angle > 90 then

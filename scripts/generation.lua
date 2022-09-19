@@ -23,7 +23,7 @@ function generationInit()
         noEnemy = true,  -- disable enemy spawning
         noIsland = false,  -- disable island spawning
         noDaytime = true,  -- disable daytime cycle
-        islandsCount = nil  -- fix the count of islands spawned to this value. No count if nil.
+        islandsCount = 1  -- fix the count of islands spawned to this value. No count if nil.
     }
 
     local debugConfigStr = ""
@@ -119,6 +119,27 @@ function generationInit()
         spawn = 4
     }
 
+    waveCooldown = {
+        value = 0,
+        default = 0.2--1
+    }
+
+    wavesData = {
+        cooldown = {
+            value = 0,
+            default = 0.8
+        },
+        density = 1.8,
+        speed = 10,
+        length = 15,
+        toProcess = {},
+        snd = {
+            LoadSound("MOD/snd/wave_1.ogg"),
+            LoadSound("MOD/snd/wave_2.ogg"),
+            LoadSound("MOD/snd/wave_3.ogg")
+        }
+    }
+
 end
 
 function generationTick(dt)
@@ -150,7 +171,7 @@ function generationTick(dt)
         if x == tiles[i].pos[1] and z == tiles[i].pos[3] then
             c = 1
         end
-        --drawAaBbBox(wp, top, true, c, 1 - c)
+        drawAaBbBox(wp, top, true, c, 1 - c)
     end
     updateIslands()
     if InputPressed("c") then
@@ -161,6 +182,8 @@ end
 function generationUpdate(dt)
     updateDaytime(dt)
     updateSpawnCooldown(dt)
+    updateWaves(dt)
+    processWaves(dt)
 end
 
 function generationDraw(dt)
@@ -171,6 +194,14 @@ function generationDraw(dt)
             drawIslandMap(island)
             drawCompass()
         end
+    end
+end
+
+function updateWaves(dt)
+    wavesData.cooldown.value = wavesData.cooldown.value - dt
+    if wavesData.cooldown.value <= 0 then
+        wavesData.cooldown.value = wavesData.cooldown.default
+        waves()
     end
 end
 
@@ -386,6 +417,91 @@ function updateSpawnCooldown(dt)
     end
 end
 
+function processWaves(dt)
+    local waves = wavesData.toProcess
+    local toKeep = {}
+    for i=1, #waves do
+        local w = waves[i]
+        w.timeToDie = w.timeToDie - dt
+        if w.timeToDie <= 0 then
+            PlaySound(wavesData.snd[rand(1, #wavesData.snd)], w.hitPos, 0.6)
+        else
+            toKeep[#toKeep + 1] = w
+        end
+    end
+    wavesData.toProcess = toKeep
+end
+
+function waves()
+    local x, y = getPlayerTile()
+
+    local island = tilesCoordToIndex[x][y].island
+    
+    if island ~= nil then
+        local vertexTarget = island.vertex[rand(1, #island.vertex)]
+        local waveTarget = VecAdd(toWorldPos(coord(x, y)), VecScale(coord(vertexTarget.x, vertexTarget.y), islandTileSize))
+        local offset = randVec(1)
+        offset[2] = 0
+        offset = vecResize(offset, tileSize * 0.5)
+        --offset = Vec(tileSize * 0.66, 0, 0)
+        local offsetPos = VecAdd(waveTarget, offset)
+        --DrawLine(offsetPos, GetPlayerTransform().pos)
+        local dir = VecNormalize(VecSub(waveTarget, offsetPos))
+        --DebugPrint("hey")
+        makeWave(offsetPos, dir)
+    end
+end
+
+function makeWave(pos, dir)
+    local waveLine = QuatRotateVec(QuatEuler(0, 90, 0), dir)
+    local waveSpeed = wavesData.speed
+    local radius = 0.35
+	local life = 20
+    local waveLength = wavesData.length
+	local count = waveLength * wavesData.density / radius
+	local alpha = 0.3
+	
+	--Set up the particle state
+	ParticleReset()
+	ParticleType("plain")
+	ParticleRadius(radius)
+	ParticleAlpha(0, alpha)
+	ParticleGravity(0)
+	ParticleDrag(0)--.01)
+	ParticleTile(0)
+    ParticleEmissive(0.8, 0.8)
+
+    local maxDist = tileSize
+    local hit, dist = QueryRaycast(pos, dir, maxDist)
+    if hit then
+        life = dist / waveSpeed
+    else
+        return
+    end
+
+    local hitPos = VecAdd(pos, VecScale(dir, dist))
+    wavesData.toProcess[#wavesData.toProcess + 1] = {
+        hitPos = hitPos,
+        timeToDie = life
+    }
+	
+	--Emit particles
+	for i=1, count do
+        local red = 0.8
+        local green = 0.8
+        local blue = 0.85
+        ParticleColor(red, green, blue, 0.6, 0.6, 0.75)
+		local p = VecAdd(pos, VecScale(waveLine, waveLength * i / count - waveLength / 2))
+        p = VecAdd(p, VecScale(dir, math.cos(i * 0.2) * 0.2))
+	
+		--Randomize lifetime
+
+        local vel = VecScale(dir, waveSpeed)
+
+		SpawnParticle(p, vel, life)
+	end
+end
+
 function drawCompass()
     UiPush()
         UiTranslate(1350, 650)
@@ -473,6 +589,7 @@ function makeIsland(tile)
         biome = tile.biome,
         name = "island_name",
         topology = {},
+        vertex = {},
         bodies = {},
         maxHeight = 0,
         pos = tile.pos,
@@ -503,7 +620,7 @@ function makeIsland(tile)
 
     local propDensity = randFloat(0.25, 0.75) --0.7--0.25
 
-    island.topology, island.maxHeight = makeLinearTopology()
+    island.topology, island.maxHeight, island.vertex = makeLinearTopology()
 
     local top = island.topology
 
@@ -685,7 +802,7 @@ function makeLinearTopology()
         end
     end
 
-    return top, bestHeight
+    return top, bestHeight, vertex
 end
 
 

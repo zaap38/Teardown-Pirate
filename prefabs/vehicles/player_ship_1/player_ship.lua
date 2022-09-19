@@ -66,6 +66,10 @@ function init()
             canons.left[#canons.left + 1] = canon
         end
     end
+
+    pitchTime = 0
+    pitchSpeed = 0
+    pitchAngle = 0
 end
 
 function tick(dt)
@@ -81,11 +85,22 @@ end
 
 function update(dt)
     updateCanonsCooldown(dt)
+    updatePitch(dt)
     stabilize(dt)
 end
 
 function draw(dt)
 
+end
+
+function updatePitch(dt)
+    pitchTime = pitchTime + dt * 0.5
+    local pitchForce = 0.13
+    if math.cos(math.rad(pitchTime * 100) + math.pi) < 0 then
+        pitchForce = -pitchForce
+    end
+    pitchSpeed = pitchSpeed * 0.97 + pitchForce * dt
+    pitchAngle = pitchAngle + dt * pitchSpeed
 end
 
 function updateSailPos()
@@ -109,8 +124,14 @@ function stabilize(dt)
             selfRotSpeed = selfRotSpeed + selfRotForce * dt
         end
     end
-    if IsPointInWater(GetVehicleTransform(vehicleHandle).pos) then
-        ConstrainOrientation(vehicleBody, 0, QuatEuler(0, selfRotSpeed * dt, 0), Quat())
+    local vt = GetVehicleTransform(vehicleHandle)
+    if IsPointInWater(VecAdd(vt.pos, Vec(0, -5, 0))) then
+        local rx, ry, rz = GetQuatEuler(vt.rot)
+        local dy = selfRotSpeed * dt
+        local px, py, pz = GetQuatEuler(QuatRotateQuat(QuatEuler(pitchAngle, 0, 0), QuatEuler(0, ry, 0)))
+        local rotation = QuatEuler(px, dy, -pz)
+        
+        ConstrainOrientation(vehicleBody, 0, rotation, Quat())
     end
 end
 

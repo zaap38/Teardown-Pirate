@@ -23,7 +23,7 @@ function generationInit()
         noEnemy = true,  -- disable enemy spawning
         noIsland = false,  -- disable island spawning
         noDaytime = true,  -- disable daytime cycle
-        islandsCount = 1  -- fix the count of islands spawned to this value. No count if nil.
+        islandsCount = nil  -- fix the count of islands spawned to this value. No count if nil.
     }
 
     local debugConfigStr = ""
@@ -121,7 +121,7 @@ function generationInit()
 
     waveCooldown = {
         value = 0,
-        default = 0.2--1
+        default = 1
     }
 
     wavesData = {
@@ -147,14 +147,17 @@ function generationTick(dt)
     if enteringChunk() then
         addMissingTiles()
     end
-    DebugWatch("#tiles", #tiles)
+    --DebugWatch("#tiles", #tiles)
     DebugWatch("#islands", #islands)
     renderedCount = 0
+    local bodyCount = 0
     for i=1, #islands do
         if #islands[i].bodies > 0 then
+            bodyCount = bodyCount + #islands[i].bodies
             renderedCount = renderedCount + 1
         end
     end
+    DebugWatch("Body count", bodyCount)
     DebugWatch("Rendered", renderedCount .. "/" .. renderedLimit)
     local x, z = getTileCoord(GetPlayerTransform().pos)
     local tile = tilesCoordToIndex[x][z]
@@ -162,7 +165,7 @@ function generationTick(dt)
         DebugWatch("Island name", tile.island.name)
     end
     DebugWatch("Player Tile", x .. " " .. z)
-    DebugWatch("Map", displayMap)
+    --DebugWatch("Map", displayMap)
     for i=1, #tiles do
         local c = 0
         local wp = toWorldPos(tiles[i].pos)
@@ -589,6 +592,7 @@ function makeIsland(tile)
         biome = tile.biome,
         name = "island_name",
         topology = {},
+        xml = "",
         vertex = {},
         bodies = {},
         maxHeight = 0,
@@ -959,7 +963,8 @@ function isIslandCloserToPlayer(a, b)
     local db = VecLength(VecSub(toWorldPos(b.pos), playerPos))
     local sa = a.renderState
     local sb = b.renderState
-    if renderedCount >= renderedLimit then
+    return da < db
+    --[[if renderedCount >= renderedLimit then
         if sa == 3 then
             if sb == 3 then
                 return da < db
@@ -986,7 +991,7 @@ function isIslandCloserToPlayer(a, b)
         else
             return da >= db
         end
-    end
+    end]]
 end
 
 function updateIslands()
@@ -996,7 +1001,7 @@ function updateIslands()
     end
 
     if #islands > 1 then
-        table.sort(islands, isIslandCloserToPlayer)
+        --table.sort(islands, isIslandCloserToPlayer)
     end
 
     --[[DebugPrint("vvvvvvvvvvvvvv")
@@ -1009,7 +1014,6 @@ function updateIslands()
     for i=1, #islands do
         local dist = VecLength(VecSub(toWorldPos(islands[i].pos), GetPlayerTransform().pos))
         if updateIslandRenderState(islands[i]) then
-            DebugWatch("Rendering", true)
             break
         end
     end
@@ -1030,7 +1034,8 @@ function updateIslandRenderState(island)
         island.renderState = 0
     end
 
-    return render(island, old) ~= nil
+    --return render(island, old) ~= nil
+    return renderXml(island, old) ~= nil
 end
 
 function render(island, previousState)
@@ -1170,4 +1175,139 @@ function render(island, previousState)
     end
 
     return true
+end
+
+function renderXml(island, previousState)
+    if previousState ~= island.renderState then
+        if previousState <= 1 then
+            for i=1, #island.bodies do
+                Delete(island.bodies[i])
+            end
+            island.bodies = {}
+            island.xml = ""
+        end
+        island.renderIndex = 1
+    else
+        if island.renderIndex >= #island.tiles and island.renderState == 3 then
+            return
+        elseif island.renderIndex >= #island.bodies and island.renderState == 0 then
+            island.bodies = {}
+            island.xml = ""
+            return
+        elseif island.renderState == 1 then
+            return
+        end
+    end
+
+    if island.renderState == 0 then
+        DebugWatch("Rendering", "Deleting")
+        local sup = math.min(#island.bodies, island.renderIndex + #island.bodies)
+        for i=island.renderIndex, sup - 1 do
+            Delete(island.bodies[i])
+        end
+        island.xml = ""
+        island.renderIndex = sup
+
+        return false
+        
+    elseif island.renderState == 1 then
+
+    elseif island.renderState == 2 then
+
+    elseif island.renderState == 3 then
+        local sup = math.min(#island.tiles, island.renderIndex + maxRenderIncrement)
+        for i=island.renderIndex, sup - 1 do
+            local entities
+            local b
+            local spawnTransform
+            local tile = island.tiles[i]
+            local tilePath = "MOD/prefabs/tiles/" .. tile.material .. "/"
+            if tile.blockname == "corner_concav_1" then
+
+                local blockname = "corner_concav"
+                local blockname_2 = "corner_concav_2"
+                if tile.material == "transition2" then
+                    blockname = "corner_concav_t"
+                    blockname_2 = "corner_concav_t_2"
+                    tilePath = "MOD/prefabs/tiles/transition/"
+                end
+                
+                island.xml = island.xml .. "<instance pos=\"" .. vecToStr(tile.transform.pos, false) .. "\" \
+                    rot=\"" .. quatToStr(tile.transform.rot, false) .. "\" \
+                    file=\"" .. tilePath .. blockname_2 ..".xml\" />\n"
+
+                spawnTransform = TransformCopy(tile.transform)
+                spawnTransform.pos[2] = spawnTransform.pos[2] + islandTileHeight
+                island.xml = island.xml .. "<instance pos=\"" .. vecToStr(spawnTransform.pos, false) .. "\" \
+                    rot=\"" .. quatToStr(spawnTransform.rot, false) .. "\" \
+                    file=\"" .. tilePath .. blockname ..".xml\" />\n"
+
+            elseif tile.blockname == "flat_2" then
+
+                local path2 = deepcopy(tilePath)
+                local blockname_2 = "corner_concav"
+                if tile.material == "transition2" then
+                    blockname_2 = "corner_concav_t"
+                    tilePath = "MOD/prefabs/tiles/transition/"
+                    path2 = "MOD/prefabs/tiles/sand/"
+                end
+
+                island.xml = island.xml .. "<instance pos=\"" .. vecToStr(tile.transform.pos, false) .. "\" \
+                    rot=\"" .. quatToStr(tile.transform.rot, false) .. "\" \
+                    file=\"" .. path2 .."flat.xml\" />\n"
+
+                spawnTransform = TransformCopy(tile.transform)
+                spawnTransform.pos[2] = spawnTransform.pos[2] + islandTileHeight
+                island.xml = island.xml .. "<instance pos=\"" .. vecToStr(spawnTransform.pos, false) .. "\" \
+                    rot=\"" .. quatToStr(spawnTransform.rot, false) .. "\" \
+                    file=\"" .. tilePath .. blockname_2 ..".xml\" />\n"
+
+            else
+                island.xml = island.xml .. "<instance pos=\"" .. vecToStr(tile.transform.pos, false) .. "\" \
+                    rot=\"" .. quatToStr(tile.transform.rot, false) .. "\" \
+                    file=\"" .. tilePath .. tile.blockname ..".xml\" />\n"
+            end
+
+            local size = islandTileHeight * (tile.height - bottom - 1)
+            spawnTransform = TransformCopy(tile.transform)
+            spawnTransform.pos[2] = bottom * islandTileHeight
+            spawnTransform.pos = VecAdd(spawnTransform.pos, Vec(-0.5 * islandTileSize, 0.5 * islandTileHeight, -0.5 * islandTileSize))
+            spawnTransform.rot = Quat()
+
+            island.xml = island.xml .. "<voxbox pos='" .. vecToStr(spawnTransform.pos, false) .. "' \
+                rot='" .. quatToStr(spawnTransform.rot, false) .. "' \
+                size='" .. islandTileSize * 10 .." ".. size * 10 .." " .. islandTileSize * 10 .. "' color='0.3 0.3 0.3' />\n"
+            
+
+            if tile.prop then
+                local propTransform = TransformToParentTransform(tile.transform, tile.propLocalTransform)
+                island.xml = island.xml .. "<instance pos=\"" .. vecToStr(propTransform.pos, false) .. "\" \
+                    rot=\"" .. quatToStr(propTransform.rot, false) .. "\" \
+                    file='MOD/prefabs/prop/" .. tile.propType .. "s/" .. tile.propName .. ".xml' />\n"
+
+            elseif tile.treasure == 2 then
+                spawnTransform = TransformCopy(tile.transform)
+                spawnTransform.pos = VecAdd(spawnTransform.pos, Vec(0, -1, 0))
+                island.xml = island.xml .. "<instance pos=\"" .. vecToStr(spawnTransform.pos, false) .. "\" \
+                    rot=\"" .. quatToStr(spawnTransform.rot, false) .. "\" \
+                    file='MOD/prefabs/prop/treasure_1.xml' />\n"
+            end
+        end
+        DebugWatch("Rendering", "Spawning")
+        island.renderIndex = sup
+        local xml = xmlWrap(island.xml)
+        local entities = Spawn(xml, Transform())
+        b = getSpawnedEntities(entities, "body")
+        for j=1, #b do
+            SetBodyDynamic(b[j], false)
+            island.bodies[#island.bodies + 1] = b[j]
+        end
+        island.xml = ""
+    end
+
+    return true
+end
+
+function xmlWrap(text)
+    return "<prefab version=\"1.1.0\"><group name=\"test_island\">" .. text .. "</group></prefab>"
 end

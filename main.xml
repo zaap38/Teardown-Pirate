@@ -1,10 +1,11 @@
 <scene version="1.1.0" shadowVolume="20 10 20">
 	<environment template="sunny" skyboxrot="-45" fogParams="400 460 0.9 8"/>
-	<voxbox pos="-0.5 -0.9 -0.4" size="10 40 10" color="0.39 0.34 0.34"/>
+	<voxbox pos="-0.5 -0.9 -9.7" size="200 40 600" color="0.39 0.34 0.34"/>
 	<script file="main.lua"/>
 	<script file="sandbox.lua"/>
 	<body dynamic="true"/>
 	<instance pos="-12.7 -1.6 51.5" rot="0.0 0.0 0.0" file="MOD/prefabs/vehicles/player_ship_1/shipwreck.xml"/>
 	<spawnpoint pos="0.0 4.5 0.0"/>
+	<postprocessing saturation="0.7"/>
 </scene>
 

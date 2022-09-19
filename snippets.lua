@@ -66,17 +66,28 @@ function debugWatchTable(t)
 	end
 end
 
-function vecToString(v)
-	return "Vec(" .. v[1] .. ", " .. v[2] .. ", " .. v[3] .. ")"
+function vecToString(v, verbose)
+	verbose = verbose or false
+	if verbose then
+		return "Vec(" .. v[1] .. ", " .. v[2] .. ", " .. v[3] .. ")"
+	else
+		return v[1] .. " " .. v[2] .. " " .. v[3]
+	end
 end
 
-function vecToStr(v)
-	return vecToString(v)
+function vecToStr(v, verbose)
+	verbose = verbose or false
+	return vecToString(v, verbose)
 end
 
-function quatToStr(q)
+function quatToStr(q, verbose)
+	verbose = verbose or false
 	local x, y, z = GetQuatEuler(q)
-	return "Quat(" .. x .. ", " .. y .. ", " .. z .. ")"
+	if verbose then
+		return "Quat(" .. x .. ", " .. y .. ", " .. z .. ")"
+	else
+		return x .. " " .. y .. " " .. z
+	end
 end
 
 function getSpawnedEntities(ent, type, debug)

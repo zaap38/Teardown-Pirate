@@ -9,6 +9,9 @@ function generationInit()
     islandTileSize = 5
     islandTileHeight = 3
 
+    enemyCount = 0
+    maxEnemyCount = 4
+
     renderDist = 3.2
     renderedCount = 0
     renderedLimit = 3
@@ -43,6 +46,7 @@ function generationInit()
     maxRenderIncrement = 1
 
     bottom = -2
+    transitionHeight = 3
 
     tileSize = 200
 
@@ -50,14 +54,57 @@ function generationInit()
 
     previousPlayerCoord = Vec(-1000, -1000, -1000)
 
+    biomeType = {
+        desertic = 1,
+        village = 2,
+        harbour = 3,
+        spawn = 4
+    }
+
     propList = {}
     propList[#propList + 1] = {
         name = "tree",
-        count = 1
+        count = 2,
+        probability = 70,
+        condition = {
+            heightMin = 1
+        }
+    }
+    propList[#propList + 1] = {
+        name = "bush",
+        count = 4,
+        probability = 40,
+        condition = {
+            heightMin = transitionHeight
+        }
     }
     propList[#propList + 1] = {
         name = "house",
-        count = 1
+        count = 1,
+        probability = 25,
+        condition = {
+            floor = {"flat", "carpet"},
+            biome = {biomeType.village, biomeType.harbour},
+            jump = true
+        }
+    }
+    propList[#propList + 1] = {
+        name = "barrel",
+        count = 2,
+        probability = 5,
+        condition = {
+            floor = {"flat", "carpet"}
+        }
+    }
+    propList[#propList + 1] = {
+        name = "bridge",
+        count = 1,
+        probability = 10,
+        condition = {
+            limit = 2,
+            heightMin = 0,
+            heightMax = 0
+        }
     }
 
     markerPropList = {}
@@ -72,7 +119,10 @@ function generationInit()
         tree = "MOD/img/tree.png",
         treasureOn = "MOD/img/treasureOn.png",
         treasureOff = "MOD/img/treasureOff.png",
-        house = "MOD/img/house.png"
+        house = "MOD/img/house.png",
+        bush = "MOD/img/bush.png",
+        bridge = "MOD/img/bridge.png",
+        barrel = "MOD/img/barrel.png"
     }
 
     names = {
@@ -112,13 +162,6 @@ function generationInit()
         }
     }
 
-    biomeType = {
-        desertic = 1,
-        village = 2,
-        harbour = 3,
-        spawn = 4
-    }
-
     waveCooldown = {
         value = 0,
         default = 1
@@ -130,8 +173,8 @@ function generationInit()
             default = 0.8
         },
         density = 1.8,
-        speed = 10,
-        length = 15,
+        speed = 6,
+        length = 10,
         toProcess = {},
         snd = {
             LoadSound("MOD/snd/wave_1.ogg"),
@@ -139,7 +182,6 @@ function generationInit()
             LoadSound("MOD/snd/wave_3.ogg")
         }
     }
-
 end
 
 function generationTick(dt)
@@ -159,6 +201,16 @@ function generationTick(dt)
     end
     DebugWatch("Body count", bodyCount)
     DebugWatch("Rendered", renderedCount .. "/" .. renderedLimit)
+
+    enemyCount = 0
+    local enemies = FindVehicles("enemy", true)
+    for i=1, #enemies do
+        if GetVehicleHealth(enemies[i]) > 0.5 then
+            enemyCount = enemyCount + 1
+        end
+    end
+
+    DebugWatch("#Enemies", enemyCount)
     local x, z = getTileCoord(GetPlayerTransform().pos)
     local tile = tilesCoordToIndex[x][z]
     if tile.island ~= nil then
@@ -174,7 +226,7 @@ function generationTick(dt)
         if x == tiles[i].pos[1] and z == tiles[i].pos[3] then
             c = 1
         end
-        drawAaBbBox(wp, top, true, c, 1 - c)
+        --drawAaBbBox(wp, top, true, c, 1 - c)
     end
     updateIslands()
     if InputPressed("c") then
@@ -351,7 +403,6 @@ function drawIslandMap(island)
         }
         UiTranslate(offset.x, offset.y)
         UiColor(0.5, 0.5, 0.8)
-        --UiRect(width - offset.x * 2, height - offset.y * 2)
 
         for i=1, #island.tiles do
             UiPush()
@@ -362,7 +413,6 @@ function drawIslandMap(island)
                 local celHeight = tile.height
                 if celHeight >= 0 then
                     local ratio = celHeight / island.maxHeight
-                    local image = ""
                     if tile.material == "sand" then
                         UiColor(base + 0.2 + ratio * 0.5, base + 0.2 + ratio * 0.5, base * ratio)
                     elseif tile.material == "transition" or tile.material == "transition2" then
@@ -372,22 +422,41 @@ function drawIslandMap(island)
                     else
                         UiColor(base * ratio, base + 0.5 * ratio, base * ratio)
                     end
-                    if tile.treasure == 2 then
-                        image = mapSprite.treasureOn
-                    elseif tile.treasure == 1 then
-                        image = mapSprite.treasureOff
-                    elseif tile.prop then
-                        image = mapSprite[tile.propType]
-                    end
                     UiRect(size, size)
-                    if image ~= "" then
-                        UiPush()
-                            UiColor(1, 1, 1, 1)
-                            UiImageBox(image, size, size, 0, 0)
-                        UiPop()
-                    end
                 end
             UiPop()
+        end
+
+        for line=0, maxIslandSize do
+            for i=1, #island.tiles do
+                if island.tiles[i].coord[3] == line then
+                    UiPush()
+                        local tile = island.tiles[i]
+                        local x = tile.coord[1]
+                        local y = tile.coord[3]
+                        local image = ""
+                        UiTranslate(x * size, y * size)
+                        if tile.height >= 0 then
+                            if tile.treasure == 2 then
+                                image = mapSprite.treasureOn
+                            elseif tile.treasure == 1 then
+                                image = mapSprite.treasureOff
+                            elseif tile.prop then
+                                image = mapSprite[tile.propType]
+                            end
+                            if image ~= "" then
+                                UiPush()
+                                    UiColor(1, 1, 1, 1)
+                                    --local propPos = VecCopy(tile.propLocalTransform.pos)
+                                    --propPos = QuatRotateVec(tile.transform.rot, propPos)
+                                    --UiTranslate(propPos[1] * size, propPos[3] * size)
+                                    UiImageBox(image, size, size, 0, 0)
+                                UiPop()
+                            end
+                        end
+                    UiPop()
+                end
+            end
         end
         
         UiPush()
@@ -410,7 +479,7 @@ function updateSpawnCooldown(dt)
         local tile = tiles[i]
         if tile.biome == biomeType.spawn then
             tile.spawnCooldown.value = tile.spawnCooldown.value - dt
-            if tile.spawnCooldown.value <= 0 and VecLength(VecSub(toWorldPos(tile.pos), GetPlayerTransform().pos)) <= 4 * tileSize then
+            if tile.spawnCooldown.value <= 0 and VecLength(VecSub(toWorldPos(tile.pos), GetPlayerTransform().pos)) <= 4 * tileSize and enemyCount < maxEnemyCount then
                 tile.spawnCooldown.value = tile.spawnCooldown.default
                 if not (debug.noSpawn or debug.noEnemy) then
                     spawnEnemyBoat(tile)
@@ -428,6 +497,7 @@ function processWaves(dt)
         w.timeToDie = w.timeToDie - dt
         if w.timeToDie <= 0 then
             PlaySound(wavesData.snd[rand(1, #wavesData.snd)], w.hitPos, 0.6)
+            makeWave(w.hitPos, VecScale(w.dir, -1), true)
         else
             toKeep[#toKeep + 1] = w
         end
@@ -445,17 +515,15 @@ function waves()
         local waveTarget = VecAdd(toWorldPos(coord(x, y)), VecScale(coord(vertexTarget.x, vertexTarget.y), islandTileSize))
         local offset = randVec(1)
         offset[2] = 0
-        offset = vecResize(offset, tileSize * 0.5)
-        --offset = Vec(tileSize * 0.66, 0, 0)
+        offset = vecResize(offset, vertexTarget.height * 0.5 * islandTileSize + 8)
         local offsetPos = VecAdd(waveTarget, offset)
-        --DrawLine(offsetPos, GetPlayerTransform().pos)
         local dir = VecNormalize(VecSub(waveTarget, offsetPos))
-        --DebugPrint("hey")
         makeWave(offsetPos, dir)
     end
 end
 
-function makeWave(pos, dir)
+function makeWave(pos, dir, reflux)
+    reflux = reflux or false
     local waveLine = QuatRotateVec(QuatEuler(0, 90, 0), dir)
     local waveSpeed = wavesData.speed
     local radius = 0.35
@@ -470,23 +538,33 @@ function makeWave(pos, dir)
 	ParticleRadius(radius)
 	ParticleAlpha(0, alpha)
 	ParticleGravity(0)
-	ParticleDrag(0)--.01)
+    local drag = 0.01
+    if reflux then
+        drag = 0.1
+        waveSpeed = waveSpeed / 2
+        ParticleAlpha(alpha, 0)
+        life = 5
+    end
+	ParticleDrag(drag)
 	ParticleTile(0)
     ParticleEmissive(0.8, 0.8)
 
-    local maxDist = tileSize
-    local hit, dist = QueryRaycast(pos, dir, maxDist)
-    if hit then
-        life = dist / waveSpeed
-    else
-        return
-    end
+    if not reflux then
+        local maxDist = tileSize
+        local hit, dist = QueryRaycast(pos, dir, maxDist)
+        if hit then
+            life = dist / waveSpeed
+        else
+            return
+        end
 
-    local hitPos = VecAdd(pos, VecScale(dir, dist))
-    wavesData.toProcess[#wavesData.toProcess + 1] = {
-        hitPos = hitPos,
-        timeToDie = life
-    }
+        local hitPos = VecAdd(pos, VecScale(dir, dist))
+        wavesData.toProcess[#wavesData.toProcess + 1] = {
+            hitPos = hitPos,
+            timeToDie = life,
+            dir = dir
+        }
+    end
 	
 	--Emit particles
 	for i=1, count do
@@ -496,8 +574,6 @@ function makeWave(pos, dir)
         ParticleColor(red, green, blue, 0.6, 0.6, 0.75)
 		local p = VecAdd(pos, VecScale(waveLine, waveLength * i / count - waveLength / 2))
         p = VecAdd(p, VecScale(dir, math.cos(i * 0.2) * 0.2))
-	
-		--Randomize lifetime
 
         local vel = VecScale(dir, waveSpeed)
 
@@ -562,7 +638,7 @@ function addTile(pos, biome, spawnIsland)
     tilesCoordToIndex[tile.pos[1]][tile.pos[3]] = tile
 
     local spawnPos = VecAdd(VecScale(tile.pos, tileSize), Vec(tileSize / 2, 0, tileSize / 2))
-    local entities = Spawn("<water pos='0 0 0' size='" .. tileSize .. " " .. tileSize  .. " " .. tileSize  .. "'/>", Transform(spawnPos))
+    local entities = Spawn("<water pos='0 0 0' color='0 0.31 0.4 0.3' size='" .. tileSize .. " " .. tileSize  .. " " .. tileSize  .. "'/>", Transform(spawnPos))
     tile.handle = getSpawnedEntities(entities, "water")[1]
 
     if spawnIsland and not (debug.noSpawn or debug.noIsland) then
@@ -585,6 +661,50 @@ function spawnEnemyBoat(tile)
     local rotQuat = QuatLookAt(spawnPos, pt.pos)
     spawnPos[2] = -10
     Spawn("MOD/prefabs/vehicles/pirate_ship_1/shipwreck.xml", Transform(spawnPos, rotQuat))
+end
+
+function pickProp(floorType, height, counts, biome, pos)
+    local choices = {}
+    for i=1, #propList do
+        local p = propList[i]
+        if p.condition.limit ~= nil and counts[p.name] >= p.condition.limit then
+
+        elseif p.condition.heightMin ~= nil and height < p.condition.heightMin then
+
+        elseif p.condition.heightMax ~= nil and height > p.condition.heightMax then
+
+        elseif p.condition.floor ~= nil and not exist(floorType, p.condition.floor) then
+
+        elseif p.condition.biome ~= nil and not exist(biome, p.condition.biome) then
+
+        elseif p.condition.jump ~= nil and not ((pos[1] % 2) == 0 and (pos[3] % 2) == 0) then
+
+        else
+            choices[#choices + 1] = deepcopy(p)
+        end
+    end
+
+    if #choices == 0 then
+        return propList[1]
+    elseif #choices == 1 then
+        choices[#choices + 1] = {
+            name = "nothing",
+            probability = 100 - choices[1].probability
+        }
+    end
+
+    local sum = 0
+    for i=1, #choices do
+        sum = sum + choices[i].probability
+    end
+
+    local randValue = rand(0, sum)
+    for i=1, #choices do
+        randValue = randValue - choices[i].probability
+        if randValue <= 0 then
+            return choices[i]
+        end
+    end
 end
 
 function makeIsland(tile)
@@ -622,11 +742,16 @@ function makeIsland(tile)
 
     island.name = names.part1[rand(1, #names.part1)] .. " " .. names.part2[rand(1, #names.part2)]
 
-    local propDensity = randFloat(0.25, 0.75) --0.7--0.25
+    local propDensity = randFloat(0.5, 1)
 
     island.topology, island.maxHeight, island.vertex = makeLinearTopology()
 
     local top = island.topology
+
+    local counts = {}
+    for i=1, #propList do
+        counts[propList[i].name] = 0
+    end
 
     for i=1, maxIslandSize do
         for j=1, maxIslandSize do
@@ -675,7 +800,7 @@ function makeIsland(tile)
                         tile.prop = false
 
                     elseif tile.prop then
-                        local rnd = rand(1, #propList)
+                        --[[local rnd = rand(1, #propList)
                         local propType = propList[rnd]
 
                         local propName = deepcopy(propType.name)
@@ -684,21 +809,57 @@ function makeIsland(tile)
                             propName = "tree"
                         end
 
-                        local rot
-                        local offset = Vec()
-                        if propName == "tree" then
-                            rot = QuatEuler(0, rand(0, 360), 0)
-                            offset = Vec(randFloat(-1, 1), randFloat(-4.5, -1.5), randFloat(-1, 1))
-                        elseif propName == "house" then
-                            local a = Vec(i, 0, j)
-                            rot = QuatLookAt(a, center)
+                        if tile.height == 0 then
+                            propName = "bridge"
+                        end]]
+
+                        local propType = pickProp(blockname, tile.height, counts, island.biome, Vec(i, 0, j))
+                        propName = propType.name
+
+                        if propName == "nothing" then
+                            tile.prop = false
                         end
 
-                        tile.propName = propName .. "_" .. rand(1, propType.count)
-                        tile.propType = propName
-                        local half = (0.75 * islandTileSize) / 2
-                        tile.propLocalTransform = Transform(offset, rot)
-                        tile.prop = true
+                        if tile.prop then
+                            counts[propName] = counts[propName] + 1
+
+                            local rot
+                            local offset = Vec()
+                            if propName == "tree" then
+                                rot = QuatEuler(0, rand(0, 360), 0)
+                                offset = Vec(randFloat(-1, 1), randFloat(-4.5, -1.5), randFloat(-1, 1))
+
+                            elseif propName == "bush" then
+                                rot = QuatEuler(0, rand(0, 360), 0)
+                                offset = Vec(randFloat(-0.5, 0.5), randFloat(0, 0.5), randFloat(-0.5, 0.5))
+
+                            elseif propName == "barrel" then
+                                rot = QuatEuler(0, rand(0, 360), 0)
+                                offset = Vec(randFloat(-0.5, 0.5), islandTileHeight, randFloat(-0.5, 0.5))
+
+                            elseif propName == "house" then
+                                local tilePos = Vec(i, 0, j)
+                                local closestVertexPos = Vec(island.vertex[1].x, 0, island.vertex[1].y)
+                                for i=1, #island.vertex do
+                                    local vPos = Vec(island.vertex[i].x, 0, island.vertex[i].y)
+                                    if VecLength(VecSub(tilePos, vPos)) < VecLength(VecSub(tilePos, closestVertexPos)) then
+                                        closestVertexPos = vPos
+                                    end
+                                end
+                                rot = QuatRotateQuat(QuatLookAt(tilePos, closestVertexPos), QuatEuler(0, 180, 0))
+
+                            elseif propName == "bridge" then
+                                if blockname == "corner_concav_1" or blockname == "corner_concav_2" then
+                                    rot = QuatEuler(0, -45, 0)
+                                end
+                            end
+
+                            tile.propName = propName .. "_" .. rand(1, propType.count)
+                            tile.propType = propName
+                            local half = (0.75 * islandTileSize) / 2
+                            tile.propLocalTransform = Transform(offset, rot)
+                            tile.prop = true
+                        end
 
                     elseif not island.treasure.exist and rand(1, 1000) <= 13 and tile.height > 0 then
                         island.treasure.x = i
@@ -919,8 +1080,7 @@ function selectBlockType(top, i, j)
 
     local material = "sand"
 
-    local sandHeight = 2
-    local transitionHeight = sandHeight + 1
+    local sandHeight = transitionHeight - 1
     local grassHeight = 100
 
     if height <= sandHeight then
@@ -1034,147 +1194,7 @@ function updateIslandRenderState(island)
         island.renderState = 0
     end
 
-    --return render(island, old) ~= nil
     return renderXml(island, old) ~= nil
-end
-
-function render(island, previousState)
-    if previousState ~= island.renderState then
-        if previousState <= 1 then
-            for i=1, #island.bodies do
-                Delete(island.bodies[i])
-            end
-            island.bodies = {}
-        end
-        island.renderIndex = 1
-    else
-        if island.renderIndex >= #island.tiles and island.renderState == 3 then
-            return
-        elseif island.renderIndex >= #island.bodies and island.renderState == 0 then
-            island.bodies = {}
-            return
-        elseif island.renderState == 1 then
-            return
-        end
-    end
-
-    if island.renderState == 0 then
-        local sup = math.min(#island.bodies, island.renderIndex + maxRenderIncrement)
-        for i=island.renderIndex, sup - 1 do
-            Delete(island.bodies[i])
-        end
-        island.renderIndex = sup
-        
-    elseif island.renderState == 1 then
-
-    elseif island.renderState == 2 then
-
-    elseif island.renderState == 3 then
-        local sup = math.min(#island.tiles, island.renderIndex + maxRenderIncrement)
-        for i=island.renderIndex, sup - 1 do
-            local entities
-            local b
-            local spawnTransform
-            local tile = island.tiles[i]
-            local tilePath = "MOD/prefabs/tiles/" .. tile.material .. "/"
-            if tile.blockname == "corner_concav_1" then
-
-                local blockname = "corner_concav"
-                local blockname_2 = "corner_concav_2"
-                if tile.material == "transition2" then
-                    blockname = "corner_concav_t"
-                    blockname_2 = "corner_concav_t_2"
-                    tilePath = "MOD/prefabs/tiles/transition/"
-                end
-
-                entities = Spawn(tilePath .. blockname_2 .. ".xml", tile.transform)
-                b = getSpawnedEntities(entities, "body")
-                for j=1, #b do
-                    SetBodyDynamic(b[j], false)
-                    island.bodies[#island.bodies + 1] = b[j]
-                end
-
-                spawnTransform = TransformCopy(tile.transform)
-                spawnTransform.pos[2] = spawnTransform.pos[2] + islandTileHeight
-                entities = Spawn(tilePath .. blockname .. ".xml", spawnTransform)
-                b = getSpawnedEntities(entities, "body")
-                for j=1, #b do
-                    SetBodyDynamic(b[j], false)
-                    island.bodies[#island.bodies + 1] = b[j]
-                end
-
-            elseif tile.blockname == "flat_2" then
-
-                local path2 = deepcopy(tilePath)
-                local blockname_2 = "corner_concav"
-                if tile.material == "transition2" then
-                    blockname_2 = "corner_concav_t"
-                    tilePath = "MOD/prefabs/tiles/transition/"
-                    path2 = "MOD/prefabs/tiles/sand/"
-                end
-
-                entities = Spawn(path2 .. "flat.xml", tile.transform)
-                b = getSpawnedEntities(entities, "body")
-                for j=1, #b do
-                    SetBodyDynamic(b[j], false)
-                    island.bodies[#island.bodies + 1] = b[j]
-                end
-
-                spawnTransform = TransformCopy(tile.transform)
-                spawnTransform.pos[2] = spawnTransform.pos[2] + islandTileHeight
-                entities = Spawn(tilePath .. blockname_2 .. ".xml", spawnTransform)
-                b = getSpawnedEntities(entities, "body")
-                for j=1, #b do
-                    SetBodyDynamic(b[j], false)
-                    island.bodies[#island.bodies + 1] = b[j]
-                end
-
-            else
-                entities = Spawn(tilePath .. tile.blockname .. ".xml", tile.transform)
-                b = getSpawnedEntities(entities, "body")
-                for j=1, #b do
-                    SetBodyDynamic(b[j], false)
-                    island.bodies[#island.bodies + 1] = b[j]
-                end
-            end
-
-            local size = islandTileHeight * (tile.height - bottom - 1)
-            spawnTransform = TransformCopy(tile.transform)
-            spawnTransform.pos[2] = bottom * islandTileHeight
-            spawnTransform.pos = VecAdd(spawnTransform.pos, Vec(-0.5 * islandTileSize, 0.5 * islandTileHeight, -0.5 * islandTileSize))
-            spawnTransform.rot = Quat()
-
-            entities = Spawn("<voxbox pos='0 0 0'\
-                size='" .. islandTileSize * 10 .." ".. size * 10 .." " .. islandTileSize * 10 .. "'\
-                color='0.3 0.3 0.3'/>", spawnTransform)
-            b = getSpawnedEntities(entities, "body")
-            for j=1, #b do
-                SetBodyDynamic(b[j], false)
-                island.bodies[#island.bodies + 1] = b[j]
-            end
-
-            if tile.prop then
-                entities = Spawn("MOD/prefabs/prop/" .. tile.propType .. "s/" .. tile.propName .. ".xml", TransformToParentTransform(tile.transform, tile.propLocalTransform))
-                b = getSpawnedEntities(entities, "body")
-                for j=1, #b do
-                    SetBodyDynamic(b[j], false)
-                    island.bodies[#island.bodies + 1] = b[j]
-                end
-            elseif tile.treasure == 2 then
-                spawnTransform = TransformCopy(tile.transform)
-                spawnTransform.pos = VecAdd(spawnTransform.pos, Vec(0, -1, 0))
-                entities = Spawn("MOD/prefabs/prop/treasure_1.xml", spawnTransform)
-                b = getSpawnedEntities(entities, "body")
-                for j=1, #b do
-                    island.bodies[#island.bodies + 1] = b[j]
-                    treasures[#treasures + 1] = GetBodyTransform(b[j])
-                end
-            end
-        end
-        island.renderIndex = sup
-    end
-
-    return true
 end
 
 function renderXml(island, previousState)
@@ -1216,9 +1236,11 @@ function renderXml(island, previousState)
 
     elseif island.renderState == 3 then
         local sup = math.min(#island.tiles, island.renderIndex + maxRenderIncrement)
+        local entities
+        local b
+        local treasure = false
+        local dynamicProp = false
         for i=island.renderIndex, sup - 1 do
-            local entities
-            local b
             local spawnTransform
             local tile = island.tiles[i]
             local tilePath = "MOD/prefabs/tiles/" .. tile.material .. "/"
@@ -1274,18 +1296,22 @@ function renderXml(island, previousState)
             spawnTransform.pos = VecAdd(spawnTransform.pos, Vec(-0.5 * islandTileSize, 0.5 * islandTileHeight, -0.5 * islandTileSize))
             spawnTransform.rot = Quat()
 
-            island.xml = island.xml .. "<voxbox pos='" .. vecToStr(spawnTransform.pos, false) .. "' \
+            island.xml = island.xml .. "<voxbox texture='4' pos='" .. vecToStr(spawnTransform.pos, false) .. "' \
                 rot='" .. quatToStr(spawnTransform.rot, false) .. "' \
                 size='" .. islandTileSize * 10 .." ".. size * 10 .." " .. islandTileSize * 10 .. "' color='0.3 0.3 0.3' />\n"
             
 
             if tile.prop then
+                if tile.propType == "barrel" then
+                    dynamicProp = true
+                end
                 local propTransform = TransformToParentTransform(tile.transform, tile.propLocalTransform)
                 island.xml = island.xml .. "<instance pos=\"" .. vecToStr(propTransform.pos, false) .. "\" \
                     rot=\"" .. quatToStr(propTransform.rot, false) .. "\" \
                     file='MOD/prefabs/prop/" .. tile.propType .. "s/" .. tile.propName .. ".xml' />\n"
 
             elseif tile.treasure == 2 then
+                treasure = true
                 spawnTransform = TransformCopy(tile.transform)
                 spawnTransform.pos = VecAdd(spawnTransform.pos, Vec(0, -1, 0))
                 island.xml = island.xml .. "<instance pos=\"" .. vecToStr(spawnTransform.pos, false) .. "\" \
@@ -1298,8 +1324,17 @@ function renderXml(island, previousState)
         local xml = xmlWrap(island.xml)
         local entities = Spawn(xml, Transform())
         b = getSpawnedEntities(entities, "body")
+        local range = #b
+        if treasure then
+            range = range - 1
+        end
+        if dynamicProp then
+            range = range - 1
+        end
         for j=1, #b do
-            SetBodyDynamic(b[j], false)
+            if j <= range then
+                SetBodyDynamic(b[j], false)
+            end
             island.bodies[#island.bodies + 1] = b[j]
         end
         island.xml = ""

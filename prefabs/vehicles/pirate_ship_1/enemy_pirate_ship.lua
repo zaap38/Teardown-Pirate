@@ -43,9 +43,6 @@ function init()
     sinkVelocity = 0
     sinkForce = -2
 
-    selfRotSpeed = 0
-    selfRotForce = 45
-
     exploded = false
     
     local canonShapes = FindShapes("canon")
@@ -70,6 +67,8 @@ function init()
     firstEmerge = true
 
     addSelfVelocity = true
+
+    turning = 0
 end
 
 function tick(dt)
@@ -112,11 +111,11 @@ function tick(dt)
             Spawn("MOD/sword_fight/spawn/combine.xml", Transform(spawnPos))
         end
     end
+    stabilize(dt)
 end
 
 function update(dt)
     updateCanonsCooldown(dt)
-    stabilize(dt)
 end
 
 function draw(dt)
@@ -124,11 +123,35 @@ function draw(dt)
 end
 
 function stabilize(dt)
-    selfRotSpeed = rebound(selfRotSpeed * 0.97, -90, 90)
     if exploded or emerging >= 0 or not IsPointInWater(GetVehicleTransform(vehicleHandle).pos) then
         return
     end
-    ConstrainOrientation(vehicleBody, 0, QuatEuler(0, selfRotSpeed * dt, 0), Quat())
+    if isPlayerInVehicle() then
+        if InputDown("left") or InputDown("right") then
+            turning = 0.5
+        end
+    end
+    local vel = GetBodyAngularVelocity(vehicleBody)
+    vel[2] = 0
+    local vt = GetVehicleTransform(vehicleHandle)
+    turning = turning - dt
+    if turning > 0 and IsPointInWater(vt.pos) then
+        SetBodyAngularVelocity(vehicleBody, Vec(0, GetBodyAngularVelocity(vehicleBody)[2], 0))
+    end
+    local rx, ry, rz = GetQuatEuler(vt.rot)
+    local correction = Vec()
+    local correctionValue = 1 * dt
+    if rx < -0.01 then
+        correction[1] = correctionValue
+    elseif rx > 0.01 then
+        correction[1] = -correctionValue
+    elseif rz < -0.01 then
+        correction[3] = correctionValue
+    elseif rz > 0.01 then
+        correction[3] = -correctionValue
+    end   
+    SetBodyAngularVelocity(vehicleBody, VecAdd(GetBodyAngularVelocity(vehicleBody), correction))
+
 end
 
 function isPlayerInVehicle()
@@ -224,7 +247,9 @@ function drive(dt)
         steering = 1
     end
 
-    selfRotSpeed = selfRotSpeed - steering * GetTimeStep() * selfRotForce
+    if steering ~= 0 then
+        turning = 0.5
+    end
 
     DriveVehicle(vehicleHandle, 1, steering, false)
 end

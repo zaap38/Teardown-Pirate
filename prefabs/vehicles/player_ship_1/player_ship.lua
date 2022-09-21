@@ -70,6 +70,7 @@ function init()
     pitchTime = 0
     pitchSpeed = 0
     pitchAngle = 0
+    turning = 0
 end
 
 function tick(dt)
@@ -81,12 +82,12 @@ function tick(dt)
         drawCanonsAim()
     end
     drive()
+    stabilize(dt)
 end
 
 function update(dt)
     updateCanonsCooldown(dt)
     updatePitch(dt)
-    stabilize(dt)
 end
 
 function draw(dt)
@@ -116,22 +117,29 @@ function updateSailPos()
 end
 
 function stabilize(dt)
-    selfRotSpeed = selfRotSpeed * 0.97
     if isPlayerInVehicle() then
-        if InputDown("left") then
-            selfRotSpeed = selfRotSpeed - selfRotForce * dt
-        elseif InputDown("right") then
-            selfRotSpeed = selfRotSpeed + selfRotForce * dt
+        if InputDown("left") or InputDown("right") then
+            turning = 0.5
         end
     end
     local vt = GetVehicleTransform(vehicleHandle)
-    if IsPointInWater(VecAdd(vt.pos, Vec(0, -5, 0))) then
+    turning = turning - dt
+    if turning > 0 and IsPointInWater(vt.pos) then
+        --SetBodyAngularVelocity(vehicleBody, Vec(0, GetBodyAngularVelocity(vehicleBody)[2], 0))
+    else
         local rx, ry, rz = GetQuatEuler(vt.rot)
-        local dy = selfRotSpeed * dt
-        local px, py, pz = GetQuatEuler(QuatRotateQuat(QuatEuler(pitchAngle, 0, 0), QuatEuler(0, ry, 0)))
-        local rotation = QuatEuler(px, dy, -pz)
-        
-        ConstrainOrientation(vehicleBody, 0, rotation, Quat())
+        local correction = Vec()
+        local correctionValue = 1 * dt
+        if rx < -0.01 then
+            correction[1] = -correctionValue
+        elseif rx > 0.01 then
+            correction[1] = correctionValue
+        elseif rz < -0.01 then
+            correction[3] = -correctionValue
+        elseif rz > 0.01 then
+            correction[3] = correctionValue
+        end   
+        --SetBodyAngularVelocity(vehicleBody, VecAdd(GetBodyAngularVelocity(vehicleBody), correction))
     end
 end
 

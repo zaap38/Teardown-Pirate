@@ -1,7 +1,7 @@
 <prefab version="1.1.0">
 	<group name="instance=MOD/prefabs/vehicles/pirate_ship_1/shipwreck.xml" pos="0.0 0.0 0.0" rot="0.0 0.0 0.0">
 		<script pos="7.4 -0.7 -48.1" file="MOD/prefabs/vehicles/pirate_ship_1/enemy_pirate_ship.lua">
-			<vehicle name="shipwreck" pos="-0.3 0.8 -2.05" rot="0.0 180.0 0.0" sound="yacht" topspeed="60" strength="2" steerassist="0.015">
+			<vehicle name="shipwreck" pos="-0.3 0.8 -2.05" rot="0.0 180.0 0.0" sound="yacht" topspeed="60" strength="2" steerassist="0.015" tags="enemy">
 				<body pos="0.0 0.0 -0.0" dynamic="true">
 					<vox pos="0.15 0.0 4.3" rot="0 90 0" texture="4" density="4" strength="3" file="MOD/prefabs/vehicles/pirate_ship_1/shipwreck.vox" object="rear">
 						<location tags="player" pos="-1.4 6.5 -0.05" rot="0.0 -90.0 0.0"/>

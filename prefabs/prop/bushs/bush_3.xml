@@ -1,0 +1,6 @@
+<prefab version="0.9.5">
+	<group id_="1059912896" open_="true" name="instance=MOD/prefabs/prop/bushs/bush_3.xml" pos="28.1 0.0 -4.3" rot="0.0 0.0 0.0">
+		<vox id_="1301493376" pos="0.0 0.1 0.2" file="MOD/prefabs/prop/bushs/bush_3.vox"/>
+	</group>
+</prefab>
+

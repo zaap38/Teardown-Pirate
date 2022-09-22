@@ -128,6 +128,18 @@ function generationInit()
             heightMax = 0
         }
     }
+    propList[#propList + 1] = {
+        name = "lighthouse",
+        count = 1,
+        probability = 70,
+        condition = {
+            limit = 1,
+            biome = {biomeType.harbour},
+            heightMin = 2,
+            floor = {"flat", "carpet"},
+            jump = true
+        }
+    }
 
     markerPropList = {}
     markerPropList[#markerPropList + 1] = {
@@ -144,7 +156,14 @@ function generationInit()
         house = "MOD/img/house.png",
         bush = "MOD/img/bush.png",
         bridge = "MOD/img/bridge.png",
-        barrel = "MOD/img/barrel.png"
+        barrel = "MOD/img/barrel.png",
+        lighthouse = "MOD/img/lighthouse.png",
+        stone_bridge = "MOD/img/stone_bridge.png",
+        wall = "MOD/img/wall.png",
+    }
+
+    doubleSizeImage = {
+        "lighthouse"
     }
 
     names = {
@@ -474,7 +493,12 @@ function drawIslandMap(island)
                                     --local propPos = VecCopy(tile.propLocalTransform.pos)
                                     --propPos = QuatRotateVec(tile.transform.rot, propPos)
                                     --UiTranslate(propPos[1] * size, propPos[3] * size)
-                                    UiImageBox(image, size, size, 0, 0)
+                                    local sizeV = size
+                                    if exist(tile.propType, doubleSizeImage) then
+                                        sizeV = sizeV * 2
+                                        UiTranslate(0, -size)
+                                    end
+                                    UiImageBox(image, size, sizeV, 0, 0)
                                 UiPop()
                             end
                         end
@@ -884,6 +908,18 @@ function makeIsland(tile)
                                 else
                                     offset = Vec(0, 0, 0.1)
                                 end
+
+                            elseif propName == "lighthouse" then
+                                local tilePos = Vec(i, 0, j)
+                                local closestVertexPos = Vec(island.vertex[1].x, 0, island.vertex[1].y)
+                                for i=1, #island.vertex do
+                                    local vPos = Vec(island.vertex[i].x, 0, island.vertex[i].y)
+                                    if VecLength(VecSub(tilePos, vPos)) < VecLength(VecSub(tilePos, closestVertexPos)) then
+                                        closestVertexPos = vPos
+                                    end
+                                end
+                                offset = Vec(0, 1.6, 0)
+                                rot = QuatRotateQuat(QuatLookAt(tilePos, closestVertexPos), QuatEuler(0, 180, 0))
                             end
 
                             tile.propName = propName .. "_" .. rand(1, propType.count)

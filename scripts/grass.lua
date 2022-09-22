@@ -19,36 +19,30 @@ function init()
     tileHeight = 3
 
     tileHeight = tileHeight - 0.1
-
-    positions = {}
     local stepValue = tileSize * tileSize / count
     local randOffset = 0.25
+
+    randPositions = {}
     for i=1, count do
-        --positions[#positions + 1] = TransformToParentPoint(shapeT, Vec(math.random() * tileSize, math.random() * tileSize, tileHeight))
         local value = i * stepValue + randFloat(-0.5, 0.5) * stepValue
 
         local col = (value % tileSize)
         local row = (value - col) / tileSize + 0.5 * stepValue + randFloat(-randOffset, randOffset)
         col = col + randFloat(-randOffset, randOffset)
 
-        positions[#positions + 1] = TransformToParentPoint(shapeT, Vec(col, row, tileHeight))
-
-        local offset = VecAdd(positions[#positions], Vec(0, -tileHeight, 0))
-        local hit, dist = abRaycast(positions[#positions], offset)
-        if hit then
-            positions[#positions] = VecLerp(positions[#positions], offset, dist / tileHeight)
-        end
+        randPositions[#randPositions + 1] = Vec(col, row, tileHeight)
     end
 
     toggleOption = false
+
+    playerTile = Vec()
+    shadowBoxSize = 200
 
 end
 
 function tick(dt)
 
-    if InputPressed("v") then
-        toggleOption = not toggleOption
-    end
+    shapeT = GetShapeWorldTransform(shape)
 
     local dist = VecLength(VecSub(GetCameraTransform().pos, shapeT.pos))
     local alpha = math.min((maxDist - dist) / 5, 1)
@@ -65,10 +59,20 @@ function tick(dt)
     end
 
     if dist <= maxDist and (angle <= maxFov or dist <= 10) then
-        local newPositions = {}
+        positions = {}
+        for i=1, #randPositions do
+            positions[#positions + 1] = TransformToParentPoint(shapeT, randPositions[i])
+    
+            local offset = VecAdd(positions[#positions], Vec(0, -tileHeight, 0))
+            local hit, dist = abRaycast(positions[#positions], offset)
+            if hit then
+                positions[#positions] = VecLerp(positions[#positions], offset, dist / tileHeight)
+            end
+        end
 
         local brigtness = GetEnvironmentProperty("sunBrightness")
-        local ratio = 0.5 + 0.5 * (brigtness / 6)
+        local maxRatio = 0.6
+        local ratio = maxRatio * 0.5 + maxRatio * 0.5 * (brigtness / 6)
 
         local rx, ry, rz = GetQuatEuler(ct.rot)
         local camRot = QuatEuler(rx, ry, 0)
@@ -76,6 +80,7 @@ function tick(dt)
 
         local playTime = GetFloat("level.pirate.time")
 
+        local newPositions = {}
         for i=1, #positions do
             local pos = VecCopy(positions[i])
             local value = math.cos(math.rad(playTime * 200 + pos[1] * 100)) / 100
@@ -88,9 +93,31 @@ function tick(dt)
             if sm ~= "" and sg > sr and sg > sb then
                 drawSpriteLine(pos, offset, sprite, 2.5, sr * ratio, sg * ratio, sb * ratio, alpha, true)
 
-                newPositions[#newPositions + 1] = pos
+                newPositions[#newPositions + 1] = randPositions[i]
             end
         end
-        positions = newPositions
+        randPositions = newPositions
     end
 end
+
+function getPlayerTileInRegistry()
+    local x = GetInt("level.pirate.playerTile.x")
+    local z = GetInt("level.pirate.playerTile.z")
+    playerTile = Vec(x, 0, z)
+end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

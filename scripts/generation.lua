@@ -12,6 +12,9 @@ function generationInit()
     enemyCount = 0
     maxEnemyCount = 4
 
+    playerTile = Vec() -- x, -, z
+    shadowBoxSize = 200
+
     renderDist = 3.2
     renderedCount = 0
     renderedLimit = 3
@@ -241,6 +244,7 @@ function generationTick(dt)
         end
     end
     DebugWatch("Body count", bodyCount)
+    DebugWatch("True body count", #FindBodies("", true))
     DebugWatch("Rendered", renderedCount .. "/" .. renderedLimit)
 
     enemyCount = 0
@@ -276,10 +280,12 @@ function generationTick(dt)
 end
 
 function generationUpdate(dt)
+    updatePlayerTile()
     updateDaytime(dt)
     updateSpawnCooldown(dt)
     updateWaves(dt)
     processWaves(dt)
+    setPlayerTileInRegistry()
 end
 
 function generationDraw(dt)
@@ -327,6 +333,48 @@ function nightTemplate()
     SetEnvironmentProperty("skyboxtint", "0.2", "0.2", "0.2")
 end
 
+function updatePlayerTile()
+    local pos = GetPlayerTransform().pos
+    local currentOffset = VecScale(playerTile, shadowBoxSize)
+    pos[2] = 0
+    local offset = Vec()
+    if pos[1] < 0 then
+        offset[1] = offset[1] - 1
+    end
+    if pos[3] < 0 then
+        offset[3] = offset[3] - 1
+    end
+    if pos[1] >= shadowBoxSize then
+        offset[1] = offset[1] + 1
+    end
+    if pos[3] >= shadowBoxSize then
+        offset[3] = offset[3] + 1
+    end
+    if VecLength(offset) == 0 then
+        return
+    end
+    playerTile = VecAdd(playerTile, offset)
+    offset = VecScale(offset, -shadowBoxSize)
+    local bodies = FindBodies("", true)
+    for i=1, #bodies do
+        local body = bodies[i]
+        local vel = GetBodyVelocity(body)
+        local aVel = GetBodyAngularVelocity(body)
+        local t = GetBodyTransform(body)
+        local newPos = VecAdd(t.pos, offset)
+        SetBodyTransform(body, Transform(newPos, t.rot))
+        if IsBodyDynamic(body) then
+            SetBodyVelocity(body, vel)
+            SetBodyAngularVelocity(body, aVel)
+        end
+    end
+    
+    local pVel = GetPlayerVelocity()
+    local pt = GetPlayerTransform()
+    SetPlayerTransform(Transform(VecAdd(pt.pos, offset), pt.rot))
+    SetPlayerVelocity(pVel)
+end
+
 function dynamicTemplate(ratio)
 
     ratio = 1 - math.abs(0.5 - ratio) * 2
@@ -371,7 +419,7 @@ function getNeighbors(origin, radius, selfTile)
 end
 
 function enteringChunk()
-    local pos = coord(getTileCoord(GetPlayerTransform().pos))
+    local pos = coord(getTileCoord(toOffsetPos(GetPlayerTransform().pos)))
     if VecLength(VecSub(pos, previousPlayerCoord)) ~= 0 then
         previousPlayerCoord = pos
         return true
@@ -381,7 +429,7 @@ end
 
 function addMissingTiles()
     if playerInBorderTile() then
-        local pos = GetPlayerTransform().pos
+        local pos = toOffsetPos(GetPlayerTransform().pos)
         local x, z = getTileCoord(pos)
         spawnAdjacent(coord(x, z))
     end
@@ -409,9 +457,9 @@ function spawnAdjacent(pos)
             end
 
             if spawnIsland then
-                if false and randVal <= 50 then
+                if randVal <= 50 then
                     biome = biomeType.desertic
-                elseif false and randVal <= 90 then
+                elseif randVal <= 90 then
                     biome = biomeType.village
                 elseif randVal <= 100 then
                     biome = biomeType.harbour
@@ -560,7 +608,7 @@ function waves()
     
     if island ~= nil then
         local vertexTarget = island.vertex[rand(1, #island.vertex)]
-        local waveTarget = VecAdd(toWorldPos(coord(x, y)), VecScale(coord(vertexTarget.x, vertexTarget.y), islandTileSize))
+        local waveTarget = VecAdd(toOffsetPos(toWorldPos(coord(x, y))), VecScale(coord(vertexTarget.x, vertexTarget.y), islandTileSize))
         local offset = randVec(1)
         offset[2] = 0
         offset = vecResize(offset, vertexTarget.height * 0.5 * islandTileSize + 8)
@@ -666,7 +714,7 @@ end
 function addTile(pos, biome, spawnIsland)
     spawnIsland = spawnIsland or false
     biome = biome or 0
-    local flatPos = deepcopy(pos)
+    local flatPos = pos
     flatPos[2] = 0
     tiles[#tiles + 1] = {
         biome = biome,
@@ -945,7 +993,7 @@ function makeIsland(tile)
 end
 
 function playerInBorderTile()
-    local pos = GetPlayerTransform().pos
+    local pos = toOffsetPos(GetPlayerTransform().pos)
     local x, z = getTileCoord(pos)
     
     local origin = coord(x, z)
@@ -967,7 +1015,7 @@ function playerInBorderTile()
 end
 
 function getPlayerTile()
-    return getTileCoord(GetPlayerTransform().pos)
+    return getTileCoord(toOffsetPos(GetPlayerTransform().pos))
 end
 
 function coord(x, z)
@@ -1186,9 +1234,9 @@ function shift(array)
 end
 
 function isIslandCloserToPlayer(a, b)
-    local playerPos = GetPlayerTransform().pos
-    local da = VecLength(VecSub(toWorldPos(a.pos), playerPos))
-    local db = VecLength(VecSub(toWorldPos(b.pos), playerPos))
+    local playerPos = toOffsetPos(GetPlayerTransform().pos)
+    local da = VecLength(VecSub(toOffsetPos(toWorldPos(a.pos)), playerPos))
+    local db = VecLength(VecSub(toOffsetPos(toWorldPos(b.pos)), playerPos))
     local sa = a.renderState
     local sb = b.renderState
     return da < db
@@ -1247,6 +1295,11 @@ function updateIslands()
     end
 end
 
+function setPlayerTileInRegistry()
+    SetInt("level.pirate.playerTile.x", playerTile[1])
+    SetInt("level.pirate.playerTile.z", playerTile[3])
+end
+
 function updateIslandRenderState(island)
     local old = island.renderState
 
@@ -1263,6 +1316,14 @@ function updateIslandRenderState(island)
     end
 
     return renderXml(island, old) ~= nil
+end
+
+function toRealPos(pos)
+    return VecAdd(pos, VecScale(playerTile, -shadowBoxSize))
+end
+
+function toOffsetPos(pos)
+    return VecAdd(pos, VecScale(playerTile, shadowBoxSize))
 end
 
 function renderXml(island, previousState)
@@ -1322,13 +1383,13 @@ function renderXml(island, previousState)
                     tilePath = "MOD/prefabs/tiles/transition/"
                 end
                 
-                island.xml = island.xml .. "<instance pos=\"" .. vecToStr(tile.transform.pos, false) .. "\" \
+                island.xml = island.xml .. "<instance pos=\"" .. vecToStr(toRealPos(tile.transform.pos), false) .. "\" \
                     rot=\"" .. quatToStr(tile.transform.rot, false) .. "\" \
                     file=\"" .. tilePath .. blockname_2 ..".xml\" />\n"
 
                 spawnTransform = TransformCopy(tile.transform)
                 spawnTransform.pos[2] = spawnTransform.pos[2] + islandTileHeight
-                island.xml = island.xml .. "<instance pos=\"" .. vecToStr(spawnTransform.pos, false) .. "\" \
+                island.xml = island.xml .. "<instance pos=\"" .. vecToStr(toRealPos(spawnTransform.pos), false) .. "\" \
                     rot=\"" .. quatToStr(spawnTransform.rot, false) .. "\" \
                     file=\"" .. tilePath .. blockname ..".xml\" />\n"
 
@@ -1342,18 +1403,18 @@ function renderXml(island, previousState)
                     path2 = "MOD/prefabs/tiles/sand/"
                 end
 
-                island.xml = island.xml .. "<instance pos=\"" .. vecToStr(tile.transform.pos, false) .. "\" \
+                island.xml = island.xml .. "<instance pos=\"" .. vecToStr(toRealPos(tile.transform.pos), false) .. "\" \
                     rot=\"" .. quatToStr(tile.transform.rot, false) .. "\" \
                     file=\"" .. path2 .."flat.xml\" />\n"
 
                 spawnTransform = TransformCopy(tile.transform)
                 spawnTransform.pos[2] = spawnTransform.pos[2] + islandTileHeight
-                island.xml = island.xml .. "<instance pos=\"" .. vecToStr(spawnTransform.pos, false) .. "\" \
+                island.xml = island.xml .. "<instance pos=\"" .. vecToStr(toRealPos(spawnTransform.pos), false) .. "\" \
                     rot=\"" .. quatToStr(spawnTransform.rot, false) .. "\" \
                     file=\"" .. tilePath .. blockname_2 ..".xml\" />\n"
 
             else
-                island.xml = island.xml .. "<instance pos=\"" .. vecToStr(tile.transform.pos, false) .. "\" \
+                island.xml = island.xml .. "<instance pos=\"" .. vecToStr(toRealPos(tile.transform.pos), false) .. "\" \
                     rot=\"" .. quatToStr(tile.transform.rot, false) .. "\" \
                     file=\"" .. tilePath .. tile.blockname ..".xml\" />\n"
             end
@@ -1364,7 +1425,7 @@ function renderXml(island, previousState)
             spawnTransform.pos = VecAdd(spawnTransform.pos, Vec(-0.5 * islandTileSize, 0.5 * islandTileHeight, -0.5 * islandTileSize))
             spawnTransform.rot = Quat()
 
-            island.xml = island.xml .. "<voxbox texture='4' pos='" .. vecToStr(spawnTransform.pos, false) .. "' \
+            island.xml = island.xml .. "<voxbox texture='4' pos='" .. vecToStr(toRealPos(spawnTransform.pos), false) .. "' \
                 rot='" .. quatToStr(spawnTransform.rot, false) .. "' \
                 size='" .. islandTileSize * 10 .." ".. size * 10 .." " .. islandTileSize * 10 .. "' color='0.3 0.3 0.3' />\n"
             
@@ -1375,7 +1436,7 @@ function renderXml(island, previousState)
                     dynamicProp = true
                 end
                 local propTransform = TransformToParentTransform(tile.transform, tile.propLocalTransform)
-                island.xml = island.xml .. "<instance pos=\"" .. vecToStr(propTransform.pos, false) .. "\" \
+                island.xml = island.xml .. "<instance pos=\"" .. vecToStr(toRealPos(propTransform.pos), false) .. "\" \
                     rot=\"" .. quatToStr(propTransform.rot, false) .. "\" \
                     file='MOD/prefabs/prop/" .. tile.propType .. "s/" .. tile.propName .. ".xml' />\n"
 
@@ -1383,7 +1444,7 @@ function renderXml(island, previousState)
                 treasure = true
                 spawnTransform = TransformCopy(tile.transform)
                 spawnTransform.pos = VecAdd(spawnTransform.pos, Vec(0, -1, 0))
-                island.xml = island.xml .. "<instance pos=\"" .. vecToStr(spawnTransform.pos, false) .. "\" \
+                island.xml = island.xml .. "<instance pos=\"" .. vecToStr(toRealPos(spawnTransform.pos), false) .. "\" \
                     rot=\"" .. quatToStr(spawnTransform.rot, false) .. "\" \
                     file='MOD/prefabs/prop/treasure_1.xml' />\n"
             end

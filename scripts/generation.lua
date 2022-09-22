@@ -26,7 +26,7 @@ function generationInit()
         noEnemy = true,  -- disable enemy spawning
         noIsland = false,  -- disable island spawning
         noDaytime = true,  -- disable daytime cycle
-        islandsCount = nil  -- fix the count of islands spawned to this value. No count if nil.
+        islandsCount = 1  -- fix the count of islands spawned to this value. No count if nil.
     }
 
     local debugConfigStr = ""
@@ -102,6 +102,28 @@ function generationInit()
         probability = 10,
         condition = {
             limit = 2,
+            reject = {biomeType.harbour},
+            heightMin = 0,
+            heightMax = 0
+        }
+    }
+    propList[#propList + 1] = {
+        name = "stone_bridge",
+        count = 1,
+        probability = 5,
+        condition = {
+            limit = 3,
+            biome = {biomeType.harbour},
+            heightMin = 0,
+            heightMax = 0
+        }
+    }
+    propList[#propList + 1] = {
+        name = "wall",
+        count = 1,
+        probability = 100,
+        condition = {
+            biome = {biomeType.harbour},
             heightMin = 0,
             heightMax = 0
         }
@@ -355,7 +377,7 @@ function spawnAdjacent(pos)
     for i=1, #n do
         local offset = VecAdd(pos, n[i])
         if not tileExist(offset) then
-            local b = 0
+            local biome = 0
             local randVal = rand(1, 100)
             local spawnIsland = (rand(1, 100) <= 7) -- probability to spawn an island or a spawn
 
@@ -368,15 +390,17 @@ function spawnAdjacent(pos)
             end
 
             if spawnIsland then
-                if randVal <= 50 then
-                    b = biomeType.desertic
+                if false and randVal <= 50 then
+                    biome = biomeType.desertic
+                elseif false and randVal <= 90 then
+                    biome = biomeType.village
                 elseif randVal <= 100 then
-                    b = biomeType.village
+                    biome = biomeType.harbour
                 end
             elseif rand(1, 100) <= 10 then
-                b = biomeType.spawn
+                biome = biomeType.spawn
             end
-            addTile(offset, b, spawnIsland)
+            addTile(offset, biome, spawnIsland)
         end
     end
 end
@@ -679,6 +703,8 @@ function pickProp(floorType, height, counts, biome, pos)
 
         elseif p.condition.jump ~= nil and not ((pos[1] % 2) == 0 and (pos[3] % 2) == 0) then
 
+        elseif p.condition.reject ~= nil and exist(biome, p.condition.reject) then
+
         else
             choices[#choices + 1] = deepcopy(p)
         end
@@ -800,18 +826,6 @@ function makeIsland(tile)
                         tile.prop = false
 
                     elseif tile.prop then
-                        --[[local rnd = rand(1, #propList)
-                        local propType = propList[rnd]
-
-                        local propName = deepcopy(propType.name)
-
-                        if (propType.name == "house" and (not (blockname == "flat" or blockname == "carpet") or not ((i % 2) == 0 and (j % 2) == 0))) or island.biome ~= biomeType.village then
-                            propName = "tree"
-                        end
-
-                        if tile.height == 0 then
-                            propName = "bridge"
-                        end]]
 
                         local propType = pickProp(blockname, tile.height, counts, island.biome, Vec(i, 0, j))
                         propName = propType.name
@@ -823,7 +837,7 @@ function makeIsland(tile)
                         if tile.prop then
                             counts[propName] = counts[propName] + 1
 
-                            local rot
+                            local rot = Quat()
                             local offset = Vec()
                             if propName == "tree" then
                                 rot = QuatEuler(0, rand(0, 360), 0)
@@ -831,7 +845,7 @@ function makeIsland(tile)
 
                             elseif propName == "bush" then
                                 rot = QuatEuler(0, rand(0, 360), 0)
-                                offset = Vec(randFloat(-0.5, 0.5), randFloat(0, 0.5), randFloat(-0.5, 0.5))
+                                offset = Vec(randFloat(-0.5, 0.5), 0, randFloat(-0.5, 0.5))
 
                             elseif propName == "barrel" then
                                 rot = QuatEuler(0, rand(0, 360), 0)
@@ -851,6 +865,24 @@ function makeIsland(tile)
                             elseif propName == "bridge" then
                                 if blockname == "corner_concav_1" or blockname == "corner_concav_2" then
                                     rot = QuatEuler(0, -45, 0)
+                                end
+
+                            elseif propName == "wall" then
+                                if blockname == "corner_concav_1" or blockname == "corner_concav_2" then
+                                    rot = QuatEuler(0, -45, 0)
+                                    offset = Vec(0, 0, 3.0)
+                                    offset = QuatRotateVec(rot, offset)
+                                else
+                                    offset = Vec(0, 0, 0.1)
+                                end
+
+                            elseif propName == "stone_bridge" then
+                                if blockname == "corner_concav_1" or blockname == "corner_concav_2" then
+                                    offset = Vec(0, 0, 3.0)
+                                    rot = QuatEuler(0, -45, 0)
+                                    offset = QuatRotateVec(rot, offset)
+                                else
+                                    offset = Vec(0, 0, 0.1)
                                 end
                             end
 
@@ -1302,6 +1334,7 @@ function renderXml(island, previousState)
             
 
             if tile.prop then
+                local addon = ""
                 if tile.propType == "barrel" then
                     dynamicProp = true
                 end

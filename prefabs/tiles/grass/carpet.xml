@@ -1,7 +1,7 @@
 <prefab version="1.1.0">
 	<group name="instance=MOD/prefabs/tiles/grass/carpet.xml" pos="0.0 0.0 0.0" rot="0.0 0.0 0.0">
 		<script pos="0 0 0" file="MOD/scripts/grass.lua">
-			<vox file="MOD/vox/tiles/grass/carpet.vox" texture="1"/>
+			<vox file="MOD/vox/tiles/grass/carpet.vox" texture="1"  blendtexture="1 0.5"/>
 		</script>
 	</group>
 </prefab>

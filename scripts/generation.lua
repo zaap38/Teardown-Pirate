@@ -29,7 +29,7 @@ function generationInit()
         noEnemy = true,  -- disable enemy spawning
         noIsland = false,  -- disable island spawning
         noDaytime = true,  -- disable daytime cycle
-        islandsCount = 1  -- fix the count of islands spawned to this value. No count if nil.
+        islandsCount = nil  -- fix the count of islands spawned to this value. No count if nil.
     }
 
     local debugConfigStr = ""

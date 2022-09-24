@@ -85,7 +85,7 @@ function generationInit()
     }
     propList[#propList + 1] = {
         name = "house",
-        count = 1,
+        count = 3,
         probability = 25,
         condition = {
             floor = {"flat", "carpet"},
@@ -659,6 +659,8 @@ function makeWave(pos, dir, reflux)
     ParticleEmissive(0.2 + sunBrightness * 0.4, 0.1, "easein")
     --ParticleEmissive(0.4)
 
+    local oneOverTwo = false
+
     local maxDist = tileSize
     local hit, dist = QueryRaycast(pos, dir, maxDist)
     if hit then
@@ -678,6 +680,12 @@ function makeWave(pos, dir, reflux)
 	
 	--Emit particles
 	for i=1, count do
+        oneOverTwo = not oneOverTwo
+        if oneOverTwo then
+            ParticleSticky(0.7)
+        else
+            ParticleSticky(0.4)
+        end
         local red = 0.8
         local green = 0.8
         local blue = 0.85

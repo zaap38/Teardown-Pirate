@@ -697,6 +697,35 @@ function makeWave(pos, dir, reflux)
 
 		SpawnParticle(p, vel, life)
 	end
+
+	ParticleRadius(0.3)
+    pos[2] = pos[2] - 0.2
+    local waveTrace = 10
+    local maxAlpha = 0.9
+    local alphaReduce = maxAlpha / waveTrace
+    for j=1, waveTrace do
+        pos = VecAdd(pos, VecScale(dir, -0.5))
+        maxAlpha = maxAlpha - alphaReduce
+        ParticleAlpha(maxAlpha, maxAlpha, "easein", 0.75, 0.9)
+        for i=1, count do
+            oneOverTwo = not oneOverTwo
+            if oneOverTwo then
+                ParticleSticky(0.7)
+            else
+                ParticleSticky(0.4)
+            end
+            local red = 0
+            local green = 0.31
+            local blue = 0.4
+            ParticleColor(red, green, blue, 0.6, 0.6, 0.75)
+            local p = VecAdd(pos, VecScale(waveLine, waveLength * i / count - waveLength / 2))
+            p = VecAdd(p, VecScale(dir, math.cos(i * 0.1) * 0.2))
+
+            local vel = VecScale(dir, waveSpeed)
+
+            SpawnParticle(p, vel, life)
+        end
+    end
 end
 
 function drawCompass()

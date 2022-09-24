@@ -267,7 +267,7 @@ function getPredictionPos()
     local upBonus = 0
     if pvehicle ~= 0 then
         playerT = GetVehicleTransform(pvehicle)
-        upBonus = 2
+        --upBonus = 2
     end
 
     shipT.pos[2] = 0

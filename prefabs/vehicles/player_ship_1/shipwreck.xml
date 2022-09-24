@@ -1,7 +1,7 @@
 <prefab version="1.1.0">
 	<group name="instance=MOD/prefabs/vehicles/player_ship_1/shipwreck.xml" pos="-12.7 -1.6 51.5" rot="0.0 0.0 0.0">
 		<script pos="7.4 -0.7 -48.1" file="MOD/prefabs/vehicles/player_ship_1/player_ship.lua">
-			<vehicle name="shipwreck" tags="boat" pos="-0.3 0.8 -2.05" rot="0.0 180.0 0.0" sound="yacht" topspeed="50" strength="2" steerassist="1.55">
+			<vehicle name="shipwreck" tags="boat" pos="-0.3 0.8 -2.05" rot="0.0 180.0 0.0" sound="yacht" topspeed="50" strength="2" steerassist="0.3">
 				<body pos="0.0 0.0 -0.0" dynamic="true">
 					<group name="lamps">
 						<vox pos="0.05 4.6 5.2" file="MOD/prefabs/vehicles/player_ship_1/shipwreck.vox" object="lamp">

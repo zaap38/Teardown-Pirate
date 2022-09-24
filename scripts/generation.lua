@@ -28,8 +28,8 @@ function generationInit()
         noSpawn = false,  -- disable enemy and island spawning
         noEnemy = true,  -- disable enemy spawning
         noIsland = false,  -- disable island spawning
-        noDaytime = true,  -- disable daytime cycle
-        islandsCount = nil  -- fix the count of islands spawned to this value. No count if nil.
+        noDaytime = false,  -- disable daytime cycle
+        islandsCount = 1  -- fix the count of islands spawned to this value. No count if nil.
     }
 
     local debugConfigStr = ""
@@ -54,6 +54,8 @@ function generationInit()
     tileSize = 200
 
     neighborhood = 3
+
+    sunBrightness = 1--GetEnvironmentProperty("sunBrightness")
 
     previousPlayerCoord = Vec(-1000, -1000, -1000)
 
@@ -132,6 +134,16 @@ function generationInit()
         }
     }
     propList[#propList + 1] = {
+        name = "beach",
+        count = 1,
+        probability = 100,
+        condition = {
+            reject = {biomeType.harbour},
+            heightMin = 0,
+            heightMax = 0
+        }
+    }
+    propList[#propList + 1] = {
         name = "lighthouse",
         count = 1,
         probability = 70,
@@ -163,6 +175,7 @@ function generationInit()
         lighthouse = "MOD/img/lighthouse.png",
         stone_bridge = "MOD/img/stone_bridge.png",
         wall = "MOD/img/wall.png",
+        beach = "MOD/img/beach.png"
     }
 
     doubleSizeImage = {
@@ -206,19 +219,14 @@ function generationInit()
         }
     }
 
-    waveCooldown = {
-        value = 0,
-        default = 1
-    }
-
     wavesData = {
         cooldown = {
             value = 0,
-            default = 0.8
+            default = 1.2
         },
-        density = 1.8,
+        density = 2.0,
         speed = 6,
-        length = 10,
+        length = 20,
         toProcess = {},
         snd = {
             LoadSound("MOD/snd/wave_1.ogg"),
@@ -393,7 +401,8 @@ function dynamicTemplate(ratio)
         b = 0.6 * ratio,
     }
 
-    SetEnvironmentProperty("sunBrightness", tostring(6 * ratio))
+    sunBrightness = ratio
+    SetEnvironmentProperty("sunBrightness", tostring(sunBrightness * 6))
     SetEnvironmentProperty("skyboxbrightness", tostring(ratio))
     SetEnvironmentProperty("sunColorTint", tostring(sunTint.r), tostring(sunTint.g), tostring(sunTint.b))
     SetEnvironmentProperty("fogColor", tostring(tint.r), tostring(tint.g), tostring(tint.b))
@@ -464,7 +473,7 @@ function spawnAdjacent(pos)
                 elseif randVal <= 100 then
                     biome = biomeType.harbour
                 end
-            elseif rand(1, 100) <= 10 then
+            elseif rand(1, 100) <= 5 then
                 biome = biomeType.spawn
             end
             addTile(offset, biome, spawnIsland)
@@ -502,18 +511,23 @@ function drawIslandMap(island)
                 local y = tile.coord[3]
                 UiTranslate(x * size, y * size)
                 local celHeight = tile.height
+                local image = ""
                 if celHeight >= 0 then
                     local ratio = celHeight / island.maxHeight
                     if tile.material == "sand" then
-                        UiColor(base + 0.2 + ratio * 0.5, base + 0.2 + ratio * 0.5, base * ratio)
+                        UiColor(base + 0.4 + ratio * 0.5, base + 0.4 + ratio * 0.5, 0.4 + base * ratio)
+                        image = "MOD/img/sand.png"
                     elseif tile.material == "transition" or tile.material == "transition2" then
-                        UiColor(base * ratio * 0.5 + (base + 0.2 + ratio * 0.5) * 0.5,
-                                (base + 0.5 * ratio) * 0.5 + (base + 0.2 + ratio * 0.5) * 0.5,
-                                base * ratio * 0.5 + (base * ratio) * 0.5)
+                        UiColor(base * ratio * 0.5 + (base + 0.4 + ratio * 0.5) * 0.5,
+                                (base + 0.5 * ratio) * 0.5 + (base + 0.4 + ratio * 0.5) * 0.5,
+                                base * ratio * 0.5 + (0.4 + base * ratio) * 0.5)
+                        image = "MOD/img/transition.png"
                     else
                         UiColor(base * ratio, base + 0.5 * ratio, base * ratio)
+                        image = "MOD/img/grass_tile.png"
                     end
                     UiRect(size, size)
+                    --UiImageBox(image, size, size, 0, 0)
                 end
             UiPop()
         end
@@ -534,13 +548,13 @@ function drawIslandMap(island)
                                 image = mapSprite.treasureOff
                             elseif tile.prop then
                                 image = mapSprite[tile.propType]
+                                if tile.propType == "beach" then
+                                    image = ""
+                                end
                             end
                             if image ~= "" then
                                 UiPush()
                                     UiColor(1, 1, 1, 1)
-                                    --local propPos = VecCopy(tile.propLocalTransform.pos)
-                                    --propPos = QuatRotateVec(tile.transform.rot, propPos)
-                                    --UiTranslate(propPos[1] * size, propPos[3] * size)
                                     local sizeV = size
                                     if exist(tile.propType, doubleSizeImage) then
                                         sizeV = sizeV * 2
@@ -575,7 +589,7 @@ function updateSpawnCooldown(dt)
         local tile = tiles[i]
         if tile.biome == biomeType.spawn then
             tile.spawnCooldown.value = tile.spawnCooldown.value - dt
-            if tile.spawnCooldown.value <= 0 and VecLength(VecSub(toWorldPos(tile.pos), GetPlayerTransform().pos)) <= 4 * tileSize and enemyCount < maxEnemyCount then
+            if tile.spawnCooldown.value <= 0 and VecLength(VecSub(toWorldPos(tile.pos), toOffsetPos(GetPlayerTransform().pos))) <= 4 * tileSize and enemyCount < maxEnemyCount then
                 tile.spawnCooldown.value = tile.spawnCooldown.default
                 if not (debug.noSpawn or debug.noEnemy) then
                     spawnEnemyBoat(tile)
@@ -593,7 +607,7 @@ function processWaves(dt)
         w.timeToDie = w.timeToDie - dt
         if w.timeToDie <= 0 then
             PlaySound(wavesData.snd[rand(1, #wavesData.snd)], w.hitPos, 0.6)
-            makeWave(w.hitPos, VecScale(w.dir, -1), true)
+            --makeWave(w.hitPos, VecScale(w.dir, -1), true)
         else
             toKeep[#toKeep + 1] = w
         end
@@ -608,10 +622,10 @@ function waves()
     
     if island ~= nil then
         local vertexTarget = island.vertex[rand(1, #island.vertex)]
-        local waveTarget = VecAdd(toOffsetPos(toWorldPos(coord(x, y))), VecScale(coord(vertexTarget.x, vertexTarget.y), islandTileSize))
+        local waveTarget = VecAdd(toWorldPos(coord(x, y)), VecScale(coord(vertexTarget.x, vertexTarget.y), islandTileSize))
         local offset = randVec(1)
         offset[2] = 0
-        offset = vecResize(offset, vertexTarget.height * 0.5 * islandTileSize + 8)
+        offset = vecResize(offset, vertexTarget.height * islandTileSize + 8)
         local offsetPos = VecAdd(waveTarget, offset)
         local dir = VecNormalize(VecSub(waveTarget, offsetPos))
         makeWave(offsetPos, dir)
@@ -619,10 +633,12 @@ function waves()
 end
 
 function makeWave(pos, dir, reflux)
-    reflux = reflux or false
+    pos = toRealPos(pos)
+    local yOffset = 0.1
+    pos[2] = pos[2] + yOffset
     local waveLine = QuatRotateVec(QuatEuler(0, 90, 0), dir)
     local waveSpeed = wavesData.speed
-    local radius = 0.35
+    local radius = 0.3
 	local life = 20
     local waveLength = wavesData.length
 	local count = waveLength * wavesData.density / radius
@@ -632,35 +648,33 @@ function makeWave(pos, dir, reflux)
 	ParticleReset()
 	ParticleType("plain")
 	ParticleRadius(radius)
-	ParticleAlpha(0, alpha)
+	--ParticleAlpha(0, alpha)
+    ParticleAlpha(1, 1, "easein", 0.75, 0.9)
 	ParticleGravity(0)
-    local drag = 0.01
-    if reflux then
-        drag = 0.1
-        waveSpeed = waveSpeed / 2
-        ParticleAlpha(alpha, 0)
-        life = 5
-    end
+    ParticleCollide(0, 1)
+    ParticleSticky(0.7)
+    local drag = 0--.01
 	ParticleDrag(drag)
 	ParticleTile(0)
-    ParticleEmissive(0.8, 0.8)
+    ParticleEmissive(0.2 + sunBrightness * 0.4, 0.1, "easein")
+    --ParticleEmissive(0.4)
 
-    if not reflux then
-        local maxDist = tileSize
-        local hit, dist = QueryRaycast(pos, dir, maxDist)
-        if hit then
-            life = dist / waveSpeed
-        else
-            return
-        end
-
-        local hitPos = VecAdd(pos, VecScale(dir, dist))
-        wavesData.toProcess[#wavesData.toProcess + 1] = {
-            hitPos = hitPos,
-            timeToDie = life,
-            dir = dir
-        }
+    local maxDist = tileSize
+    local hit, dist = QueryRaycast(pos, dir, maxDist)
+    if hit then
+        life = dist / waveSpeed
+    else
+        return
     end
+    local lifeRatio = 1.8
+    life = life * lifeRatio
+
+    local hitPos = VecAdd(pos, VecScale(dir, dist))
+    wavesData.toProcess[#wavesData.toProcess + 1] = {
+        hitPos = hitPos,
+        timeToDie = life / lifeRatio,
+        dir = dir
+    }
 	
 	--Emit particles
 	for i=1, count do
@@ -669,7 +683,7 @@ function makeWave(pos, dir, reflux)
         local blue = 0.85
         ParticleColor(red, green, blue, 0.6, 0.6, 0.75)
 		local p = VecAdd(pos, VecScale(waveLine, waveLength * i / count - waveLength / 2))
-        p = VecAdd(p, VecScale(dir, math.cos(i * 0.2) * 0.2))
+        p = VecAdd(p, VecScale(dir, math.cos(i * 0.1) * 0.2))
 
         local vel = VecScale(dir, waveSpeed)
 
@@ -754,9 +768,9 @@ function spawnEnemyBoat(tile)
     local pt = GetPlayerTransform()
     pt.pos[2] = 0
     spawnPos[2] = 0
-    local rotQuat = QuatLookAt(spawnPos, pt.pos)
+    local rotQuat = QuatLookAt(spawnPos, toOffsetPos(pt.pos))
     spawnPos[2] = -10
-    Spawn("MOD/prefabs/vehicles/pirate_ship_1/shipwreck.xml", Transform(spawnPos, rotQuat))
+    Spawn("MOD/prefabs/vehicles/pirate_ship_1/shipwreck.xml", Transform(toRealPos(spawnPos), rotQuat))
 end
 
 function pickProp(floorType, height, counts, biome, pos)
@@ -917,7 +931,7 @@ function makeIsland(tile)
 
                             elseif propName == "bush" then
                                 rot = QuatEuler(0, rand(0, 360), 0)
-                                offset = Vec(randFloat(-0.5, 0.5), 0, randFloat(-0.5, 0.5))
+                                offset = Vec(randFloat(-0.5, 0.5), 0.25, randFloat(-0.5, 0.5))
 
                             elseif propName == "barrel" then
                                 rot = QuatEuler(0, rand(0, 360), 0)
@@ -940,6 +954,15 @@ function makeIsland(tile)
                                 end
 
                             elseif propName == "wall" then
+                                if blockname == "corner_concav_1" or blockname == "corner_concav_2" then
+                                    rot = QuatEuler(0, -45, 0)
+                                    offset = Vec(0, 0, 3.0)
+                                    offset = QuatRotateVec(rot, offset)
+                                else
+                                    offset = Vec(0, 0, 0.1)
+                                end
+
+                            elseif propName == "beach" then
                                 if blockname == "corner_concav_1" or blockname == "corner_concav_2" then
                                     rot = QuatEuler(0, -45, 0)
                                     offset = Vec(0, 0, 3.0)

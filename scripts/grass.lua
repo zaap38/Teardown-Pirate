@@ -95,7 +95,7 @@ function tick(dt)
 
         local brigtness = GetEnvironmentProperty("sunBrightness")
         local maxRatio = 1.0
-        local ratioDefault = maxRatio * 0.5 + maxRatio * 0.5 * (brigtness / 6)
+        local ratioDefault = maxRatio * 0.3 + maxRatio * 0.7 * (brigtness / 6)
 
         local rx, ry, rz = GetQuatEuler(ct.rot)
         local camRot = QuatEuler(rx, ry, 0)

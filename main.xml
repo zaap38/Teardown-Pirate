@@ -1,11 +1,72 @@
 <scene version="1.1.0" shadowVolume="400 60 400">
 	<environment template="sunny" skyboxrot="-45" fogParams="400 460 0.9 8"/>
-	<voxbox pos="-0.5 -0.9 -9.7" size="200 40 600" color="0.39 0.34 0.34"/>
 	<script file="main.lua"/>
 	<script file="sandbox.lua"/>
 	<body dynamic="true"/>
-	<instance pos="-12.7 -1.6 51.5" rot="0.0 0.0 0.0" file="MOD/prefabs/vehicles/player_ship_1/shipwreck.xml"/>
-	<spawnpoint pos="0.0 4.5 0.0"/>
+	<instance pos="-12.7 -1.6 25.0" rot="0 -90" file="MOD/prefabs/vehicles/player_ship_1/shipwreck.xml"/>
+	<spawnpoint pos="40.6 2.3 25.8" rot="0 180"/>
 	<postprocessing saturation="0.7"/>
+	<group name="start_island" pos="61.1 0.0 42.6">
+		<compound tags="unbreakable=true" pos="-7.3 -1.5 -12.7" texture="1" blendtexture="4 0.3">
+			<group name="wall" pos="7.3 1.5 12.7">
+				<instance pos="-10.4 0.0 -7.7" rot="0 -90" file="MOD/prefabs/prop/walls/wall_1.xml"/>
+				<instance pos="-10.4 0.0 -17.0" rot="0 -90" file="MOD/prefabs/prop/stone_bridges/stone_bridge_1.xml"/>
+			</group>
+			<group name="climb" pos="10.2 0.0 0.0">
+				<instance pos="-2.5 1.5 12.7" file="MOD/prefabs/tiles/sand/climb.xml"/>
+				<instance pos="-7.6 1.5 12.7" file="MOD/prefabs/tiles/sand/climb.xml"/>
+				<instance pos="-12.7 1.5 7.7" rot="0 -90" file="MOD/prefabs/tiles/sand/climb.xml"/>
+				<instance pos="-12.7 1.5 2.6" rot="0 -90" file="MOD/prefabs/tiles/sand/climb.xml"/>
+				<instance pos="-12.7 1.5 -7.6" rot="0 -90" file="MOD/prefabs/tiles/sand/climb.xml"/>
+				<instance pos="-12.7 1.5 -2.5" rot="0 -90" file="MOD/prefabs/tiles/sand/climb.xml"/>
+				<instance pos="2.6 1.5 12.7" file="MOD/prefabs/tiles/sand/climb.xml"/>
+				<instance pos="7.7 1.5 12.7" file="MOD/prefabs/tiles/sand/climb.xml"/>
+				<instance pos="7.6 1.5 -12.7" rot="0 180" file="MOD/prefabs/tiles/sand/climb.xml"/>
+				<instance pos="-7.7 1.5 -12.7" rot="0 180" file="MOD/prefabs/tiles/sand/climb.xml"/>
+				<instance pos="-2.6 1.5 -12.7" rot="0 180" file="MOD/prefabs/tiles/sand/climb.xml"/>
+				<instance pos="2.5 1.5 -12.7" rot="0 180" file="MOD/prefabs/tiles/sand/climb.xml"/>
+				<instance pos="12.7 1.5 7.6" rot="0 90" file="MOD/prefabs/tiles/sand/climb.xml"/>
+				<instance pos="12.7 1.5 2.5" rot="0 90" file="MOD/prefabs/tiles/sand/climb.xml"/>
+				<instance pos="12.7 1.5 -2.5" rot="0 90" file="MOD/prefabs/tiles/sand/climb.xml"/>
+				<instance pos="12.7 1.5 -7.6" rot="0 90" file="MOD/prefabs/tiles/sand/climb.xml"/>
+				<instance pos="2.7 4.5 7.7" file="MOD/prefabs/tiles/sand/climb.xml"/>
+				<instance pos="-2.4 4.5 7.7" file="MOD/prefabs/tiles/sand/climb.xml"/>
+				<instance pos="7.7 4.5 2.4" rot="0 90" file="MOD/prefabs/tiles/sand/climb.xml"/>
+				<instance pos="7.7 4.5 -2.6" rot="0 90" file="MOD/prefabs/tiles/sand/climb.xml"/>
+				<instance pos="2.6 4.5 -7.7" rot="0 180" file="MOD/prefabs/tiles/sand/climb.xml"/>
+				<instance pos="-2.5 4.5 -7.7" rot="0 180" file="MOD/prefabs/tiles/sand/climb.xml"/>
+				<instance pos="-7.7 4.5 -2.5" rot="0 -90" file="MOD/prefabs/tiles/sand/climb.xml"/>
+				<instance pos="-7.7 4.5 2.6" rot="0 -90" file="MOD/prefabs/tiles/sand/climb.xml"/>
+			</group>
+			<group name="corner" pos="10.2 0.0 0.0">
+				<instance pos="-12.7 1.5 12.7" file="MOD/prefabs/tiles/sand/corner_concav.xml"/>
+				<instance pos="12.7 1.5 -12.7" rot="0 -180" file="MOD/prefabs/tiles/sand/corner_concav.xml"/>
+				<instance pos="-12.8 1.5 -12.7" rot="0 -90" file="MOD/prefabs/tiles/sand/corner_concav.xml"/>
+				<instance pos="12.7 1.5 12.7" rot="0 90" file="MOD/prefabs/tiles/sand/corner_concav.xml"/>
+				<instance pos="7.7 4.5 -7.7" rot="0 -180" file="MOD/prefabs/tiles/sand/corner_concav.xml"/>
+				<instance pos="7.7 4.5 7.5" rot="0 90" file="MOD/prefabs/tiles/sand/corner_concav.xml"/>
+				<instance pos="-7.5 4.5 7.7" rot="0 " file="MOD/prefabs/tiles/sand/corner_concav.xml"/>
+				<instance pos="-7.6 4.5 -7.6" rot="0 -90" file="MOD/prefabs/tiles/sand/corner_concav.xml"/>
+			</group>
+			<group name="flat" pos="7.3 1.5 12.7">
+				<instance pos="-4.8 0.0 -5.0" file="MOD/prefabs/tiles/sand/flat.xml"/>
+				<instance pos="0.2 0.0 -5.0" file="MOD/prefabs/tiles/sand/flat.xml"/>
+				<instance pos="10.6 0.0 -5.0" file="MOD/prefabs/tiles/sand/flat.xml"/>
+				<instance pos="10.6 0.0 -10.1" file="MOD/prefabs/tiles/sand/flat.xml"/>
+				<instance pos="10.6 0.0 -20.3" file="MOD/prefabs/tiles/sand/flat.xml"/>
+				<instance pos="-4.9 0.0 -20.3" file="MOD/prefabs/tiles/sand/flat.xml"/>
+				<instance pos="0.1 0.0 -20.3" file="MOD/prefabs/tiles/sand/flat.xml"/>
+				<instance pos="0.2 3.0 -15.3" file="MOD/prefabs/tiles/sand/flat.xml"/>
+				<instance pos="0.2 3.0 -10.0" file="MOD/prefabs/tiles/sand/flat.xml"/>
+				<instance pos="5.6 3.0 -15.3" file="MOD/prefabs/tiles/sand/flat.xml"/>
+				<instance pos="5.2 3.0 -15.3" file="MOD/prefabs/tiles/sand/flat.xml"/>
+				<instance pos="5.6 3.0 -10.0" file="MOD/prefabs/tiles/sand/flat.xml"/>
+				<instance pos="5.2 3.0 -10.0" file="MOD/prefabs/tiles/sand/flat.xml"/>
+				<instance pos="0.2 3.0 -10.2" file="MOD/prefabs/tiles/sand/flat.xml"/>
+				<instance pos="5.2 3.0 -10.2" file="MOD/prefabs/tiles/sand/flat.xml"/>
+				<instance pos="5.6 3.0 -10.2" file="MOD/prefabs/tiles/sand/flat.xml"/>
+			</group>
+		</compound>
+	</group>
 </scene>
 
